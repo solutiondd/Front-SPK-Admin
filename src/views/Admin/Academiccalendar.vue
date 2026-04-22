@@ -7,7 +7,7 @@
                     class="select select-bordered select-sm text-xs sm:text-base flex-1 sm:flex-none">
                     <option v-for="y in yearOptions" :key="y" :value="y">{{ y + 543 }}</option>
                 </select>
-                <button class="btn btn-primary btn-sm" @click="openCreateModal">
+                <button v-if="auth.user?.role !== 'viewer'" class="btn btn-primary btn-sm" @click="openCreateModal">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -41,7 +41,9 @@ import TermSummary from '../../components/Academiccalendar/TermSummary.vue'
 import CreateModal from '../../components/Academiccalendar/Create.vue'
 import UpdateModal from '../../components/Academiccalendar/Update.vue'
 import DeleteModal from '../../components/Academiccalendar/Delete.vue'
+import { useAuthStore } from '../../stores/auth'
 
+const auth = useAuthStore()
 const currentYear = new Date().getFullYear()
 const selectedYear = ref(currentYear)
 const refreshKey = ref(0)

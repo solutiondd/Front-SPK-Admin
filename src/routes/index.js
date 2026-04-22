@@ -23,6 +23,7 @@ const Conduct = () => import("../views/Admin/Conduct.vue");
 const AtRisk = () => import("../views/Admin/report/AtRisk.vue");
 const AcademicCalendar = () => import("../views/Admin/Academiccalendar.vue");
 const CheckName = () => import("../views/Admin/CheckName.vue");
+const Leave = () => import("../views/Admin/Leave.vue");
 
 const routes = [
   { path: "/", name: "login", component: Login },
@@ -136,6 +137,11 @@ const routes = [
         path: "checkname",
         name: "CheckName",
         component: CheckName,
+      },
+      {
+        path: "leave",
+        name: "Leave",
+        component: Leave,
       },
     ],
   },

@@ -440,6 +440,7 @@ const createLeaveRequest = async () => {
     try {
         const isEditMode = leaveModal.value.mode === 'edit';
         let leaveRequestId = leaveModal.value.requestId;
+        let leaveStatus = 'pending';
 
         if (isEditMode && leaveRequestId) {
             await leaveService.updateLeaveRequest(leaveRequestId, {
@@ -463,6 +464,12 @@ const createLeaveRequest = async () => {
                 attachment_url: '',
             });
             leaveRequestId = response?.data?._id || response?._id || null;
+
+            // Teacher-created leave from attendance screen should be approved immediately.
+            if (leaveRequestId) {
+                await leaveService.approveLeaveRequest(leaveRequestId, 'อนุมัติการลา');
+                leaveStatus = 'approved';
+            }
         }
 
         localAttendanceData.value[studentId] = {
@@ -470,17 +477,21 @@ const createLeaveRequest = async () => {
             leaveType: leaveTypeName,
             remark: reason,
             leaveRequestId,
-            leaveStatus: 'pending',
+            leaveStatus,
         };
 
-        localPendingLeaveApprovals.value[studentId] = {
-            requestId: leaveRequestId,
-            leaveTypeKey: leaveType,
-            leaveType: leaveTypeName,
-            startTime,
-            endTime,
-            reason,
-        };
+        if (leaveStatus === 'pending') {
+            localPendingLeaveApprovals.value[studentId] = {
+                requestId: leaveRequestId,
+                leaveTypeKey: leaveType,
+                leaveType: leaveTypeName,
+                startTime,
+                endTime,
+                reason,
+            };
+        } else {
+            delete localPendingLeaveApprovals.value[studentId];
+        }
 
         emit('update:attendanceData', localAttendanceData.value);
         emit('update:pendingLeaveApprovals', localPendingLeaveApprovals.value);

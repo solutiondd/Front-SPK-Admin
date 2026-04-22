@@ -1,7 +1,7 @@
 <template>
 	<dialog ref="modalRef" class="modal">
 		<div class="modal-box w-11/12 max-w-lg">
-			<h3 class="font-bold text-lg mb-4">เพิ่มประเภทการลา</h3>
+			<h3 class="font-bold text-lg mb-4">แก้ไขประเภทการลา</h3>
 
 			<form @submit.prevent="handleSubmit" class="space-y-4">
 				<div class="form-control">
@@ -31,11 +31,7 @@
 
 				<div class="flex flex-col gap-2 sm:flex-row sm:gap-6">
 					<label class="label cursor-pointer justify-start gap-3">
-						<input
-							v-model="formData.enabled"
-							type="checkbox"
-							class="checkbox checkbox-primary"
-						/>
+						<input v-model="formData.enabled" type="checkbox" class="checkbox checkbox-primary" />
 						<span class="label-text">เปิดใช้งาน</span>
 					</label>
 
@@ -50,12 +46,7 @@
 				</div>
 
 				<div class="modal-action">
-					<button
-						type="button"
-						class="btn btn-ghost"
-						:disabled="loading"
-						@click="closeModal"
-					>
+					<button type="button" class="btn btn-ghost" :disabled="loading" @click="closeModal">
 						ยกเลิก
 					</button>
 					<button type="submit" class="btn btn-primary" :disabled="loading">
@@ -76,8 +67,9 @@ import { LeaveService } from '../../api/leave';
 const leaveService = new LeaveService();
 const modalRef = ref(null);
 const loading = ref(false);
+const editingId = ref('');
 
-const emit = defineEmits(['created']);
+const emit = defineEmits(['updated']);
 
 const initialForm = () => ({
 	name: '',
@@ -90,10 +82,17 @@ const formData = ref(initialForm());
 
 const resetForm = () => {
 	formData.value = initialForm();
+	editingId.value = '';
 };
 
-const openModal = () => {
-	resetForm();
+const openModal = (leaveType) => {
+	editingId.value = leaveType?._id || '';
+	formData.value = {
+		name: leaveType?.name || '',
+		description: leaveType?.description || '',
+		enabled: Boolean(leaveType?.enabled),
+		requires_attachment: Boolean(leaveType?.requires_attachment),
+	};
 	modalRef.value?.showModal();
 };
 
@@ -102,6 +101,11 @@ const closeModal = () => {
 };
 
 const handleSubmit = async () => {
+	if (!editingId.value) {
+		Swal.fire('แจ้งเตือน', 'ไม่พบข้อมูลที่ต้องการแก้ไข', 'warning');
+		return;
+	}
+
 	if (!formData.value.name) {
 		Swal.fire('แจ้งเตือน', 'กรุณาระบุชื่อประเภทการลา', 'warning');
 		return;
@@ -109,20 +113,20 @@ const handleSubmit = async () => {
 
 	loading.value = true;
 	try {
-		const response = await leaveService.createLeaveType({
+		const response = await leaveService.updateLeaveType(editingId.value, {
 			name: formData.value.name,
 			description: formData.value.description,
 			enabled: formData.value.enabled,
 			requires_attachment: formData.value.requires_attachment,
 		});
 
-		emit('created', response?.data || response);
-		Swal.fire('สำเร็จ', 'เพิ่มประเภทการลาเรียบร้อยแล้ว', 'success');
+		emit('updated', response?.data || response);
+		Swal.fire('สำเร็จ', 'แก้ไขประเภทการลาเรียบร้อยแล้ว', 'success');
 		closeModal();
 		resetForm();
 	} catch (error) {
-		Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเพิ่มประเภทการลาได้', 'error');
-		console.error('Create leave type in CreateLeave.vue error:', error);
+		Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถแก้ไขประเภทการลาได้', 'error');
+		console.error('Update leave type error:', error);
 	} finally {
 		loading.value = false;
 	}

@@ -11,7 +11,7 @@
                         <input v-model="selectedDate" type="date" class="input input-bordered w-full"
                             @change="loadStudents" />
                     </div>
-                    <div class="w-full">
+                    <div v-if="residentRole !== 'teacher'" class="w-full">
                         <label class="block text-sm font-medium text-gray-700 mb-2">ชั้นเรียน</label>
                         <select v-model="selectedGrade" class="select select-bordered w-full"
                             @change="handleGradeChange">
@@ -21,7 +21,7 @@
                             </option>
                         </select>
                     </div>
-                    <div class="w-full">
+                    <div v-if="residentRole !== 'teacher'" class="w-full">
                         <label class="block text-sm font-medium text-gray-700 mb-2">ห้องเรียน</label>
                         <select v-model="selectedClassroom" class="select select-bordered w-full"
                             @change="loadStudents">
@@ -31,6 +31,13 @@
                                 {{ classroom.classroom }}
                             </option>
                         </select>
+                    </div>
+                    <div v-if="residentRole === 'teacher'"
+                        class="w-full sm:col-span-2 lg:col-span-2 flex sm:justify-end">
+                        <div class="p-2 text-white bg-primary rounded-md text-center min-w-[120px]">
+                            <span class="block text-sm font-medium text-secondary">ชั้นปี / ห้อง</span>
+                            <span>{{ teacherGrade }}/{{ teacherClassroom }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -55,13 +62,16 @@ import Swal from 'sweetalert2';
 const studentService = new StudentService();
 const classRoomService = new ClassRoomService();
 const leaveService = new LeaveService();
+const residentRole = localStorage.getItem('residentRole') || '';
+const teacherGrade = localStorage.getItem('grade') || '';
+const teacherClassroom = localStorage.getItem('classroom') || '';
 
 const students = ref([]);
 const classrooms = ref([]);
 const loading = ref(false);
 const selectedDate = ref(new Date().toISOString().split('T')[0]);
-const selectedGrade = ref('');
-const selectedClassroom = ref('');
+const selectedGrade = ref(residentRole === 'teacher' ? teacherGrade : '');
+const selectedClassroom = ref(residentRole === 'teacher' ? teacherClassroom : '');
 const attendanceData = ref({});
 const pendingLeaveApprovals = ref({});
 
@@ -243,6 +253,11 @@ const mapDailyStatus = async (studentList) => {
 };
 
 const loadStudents = async () => {
+    if (residentRole === 'teacher') {
+        selectedGrade.value = teacherGrade;
+        selectedClassroom.value = teacherClassroom;
+    }
+
     if (!selectedClassroom.value) {
         students.value = [];
         attendanceData.value = {};
@@ -267,5 +282,9 @@ const loadStudents = async () => {
 onMounted(() => {
     selectedDate.value = new Date().toISOString().split('T')[0];
     loadClassrooms();
+
+    if (residentRole === 'teacher') {
+        loadStudents();
+    }
 });
 </script>

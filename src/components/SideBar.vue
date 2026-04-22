@@ -238,10 +238,10 @@
                                 <span class="text-sm">จัดการคะแนน</span>
                             </router-link>
                         </li>
-                        <!-- <li>
-                            <router-link to="/home/report"
+                        <li>
+                            <router-link to="/home/leave"
                                 class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-warning/20 transition-colors"
-                                :class="submenuClass('/home')">
+                                :class="submenuClass('/home/leave')">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -249,7 +249,7 @@
                                 </svg>
                                 <span class="text-sm">จัดการวันลา</span>
                             </router-link>
-                        </li> -->
+                        </li>
                         <li>
                             <router-link to="/home/checkname"
                                 class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-warning/20 transition-colors"

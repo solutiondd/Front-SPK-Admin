@@ -1,7 +1,7 @@
 <template>
     <div class="card bg-base-100 shadow-xl">
         <div class="card-body p-3">
-            <div class="flex justify-end gap-2 mb-2">
+            <div v-if="auth.user?.role !== 'viewer'" class="flex justify-end gap-2 mb-2">
                 <button @click="handleEditAll" class="btn btn-warning btn-sm text-white" :disabled="!terms.length">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -60,7 +60,9 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue';
 import { AcademicCalendarService } from '../../api/academiccalendar';
+import { useAuthStore } from '../../stores/auth';
 
+const auth = useAuthStore();
 const props = defineProps({
     year: {
         type: [Number, String],
