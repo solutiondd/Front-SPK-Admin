@@ -238,6 +238,30 @@
                                 <span class="text-sm">จัดการคะแนน</span>
                             </router-link>
                         </li>
+                        <!-- <li>
+                            <router-link to="/home/report"
+                                class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-warning/20 transition-colors"
+                                :class="submenuClass('/home')">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10m-12 8a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12z" />
+                                </svg>
+                                <span class="text-sm">จัดการวันลา</span>
+                            </router-link>
+                        </li> -->
+                        <li>
+                            <router-link to="/home/checkname"
+                                class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-warning/20 transition-colors"
+                                :class="submenuClass('/home/checkname')">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                                <span class="text-sm">เช็คชื่อ</span>
+                            </router-link>
+                        </li>
                     </ul>
                 </li>
 
@@ -495,7 +519,7 @@ const handleMouseLeave = () => {
 
 const isBehaviorMenuOpen = ref(false)
 const isBehaviorMenuActive = computed(() => {
-    return route.path === '/home/behavior' || route.path === '/home/conduct'
+    return route.path === '/home/behavior' || route.path === '/home/conduct' || route.path === '/home/report'
 })
 const toggleBehaviorMenu = () => {
     isBehaviorMenuOpen.value = !isBehaviorMenuOpen.value

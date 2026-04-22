@@ -15,8 +15,20 @@ const getAttendanceReport = async (params) => {
       page: params.page || 1,
       limit: params.limit || 20,
     };
-    if (params.grade) queryParams.grade = params.grade;
-    if (params.classroom) queryParams.classroom = params.classroom;
+    if (
+      params.grade !== undefined &&
+      params.grade !== null &&
+      params.grade !== ""
+    ) {
+      queryParams.grade = params.grade;
+    }
+    if (
+      params.classroom !== undefined &&
+      params.classroom !== null &&
+      params.classroom !== ""
+    ) {
+      queryParams.classroom = params.classroom;
+    }
 
     const response = await axios.get(`${baseUrl}report/attendance`, {
       headers: {

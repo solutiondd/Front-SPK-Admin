@@ -105,7 +105,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { ConductService } from '../../api/Conduct.js'
+import { ConductService } from '../../api/conduct.js'
 import Detail from './Detail.vue'
 import ExportDocs from './ExportDocs.vue'
 import Swal from 'sweetalert2'

@@ -1,5 +1,70 @@
 <template>
     <div class="py-2 px-1">
+        <div v-if="conductSetting" class="card bg-base-100 shadow-md mb-6">
+            <div class="card-body">
+                <div class="flex items-center justify-between mb-3 cursor-pointer"
+                    @click="conductSettingOpen = !conductSettingOpen">
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-lg font-bold text-primary">ตั้งค่าการหักคะแนนอัตโนมัติ</span>
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            :class="['h-4 w-4 transition-transform text-base-content/60', conductSettingOpen ? 'rotate-180' : '']"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                    <button v-if="auth.user?.role !== 'viewer'" @click.stop="openConductSettingModal"
+                        class="bg-transparent border-none shadow-none p-0" title="แก้ไขการตั้งค่า">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="#fbbf24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                    </button>
+                </div>
+                <div v-show="conductSettingOpen" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
+                    <div class="rounded-lg border border-warning/40 bg-warning/5 p-3">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-semibold text-warning">มาสาย</span>
+                            <span
+                                :class="conductSetting.late?.enabled ? 'badge badge-warning badge-sm' : 'badge badge-ghost badge-sm'">
+                                {{ conductSetting.late?.enabled ? 'เปิด' : 'ปิด' }}
+                            </span>
+                        </div>
+                        <div class="text-sm space-y-1 text-base-content/80">
+                            <div>เวลาตัด: <span class="font-medium">{{ conductSetting.late?.cutoff_time || '-' }}</span>
+                            </div>
+                            <div>หักคะแนน: <span class="font-medium text-error">{{ conductSetting.late?.score }}</span>
+                            </div>
+                            <div>พฤติกรรม: <span class="font-medium">{{ conductSetting.late?.behavior }}</span></div>
+                        </div>
+                    </div>
+                    <div class="rounded-lg border border-error/40 bg-error/5 p-3">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="font-semibold text-error">ขาดเรียน</span>
+                            <span
+                                :class="conductSetting.absent?.enabled ? 'badge badge-error badge-sm' : 'badge badge-ghost badge-sm'">
+                                {{ conductSetting.absent?.enabled ? 'เปิด' : 'ปิด' }}
+                            </span>
+                        </div>
+                        <div class="text-sm space-y-1 text-base-content/80">
+                            <div>เวลาตัด: <span class="font-medium">{{ conductSetting.absent?.cutoff_time || '-'
+                                    }}</span></div>
+                            <div>หักคะแนน: <span class="font-medium text-error">{{ conductSetting.absent?.score
+                            }}</span></div>
+                            <div>พฤติกรรม: <span class="font-medium">{{ conductSetting.absent?.behavior }}</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <UpdateAttendanceSetting ref="updateAttendanceSettingModal" @updated="fetchConductSetting" />
+
         <div v-if="behaviortypes.length === 0" class="text-center py-12">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-base-300 mb-4" fill="none"
                 viewBox="0 0 24 24" stroke="currentColor">
@@ -111,7 +176,8 @@
                                                         </button>
                                                         <button v-if="auth.user?.role !== 'viewer'"
                                                             @click="deleteLevel(level)"
-                                                            class="bg-transparent border-none shadow-none p-0 ml-2" title="ลบ">
+                                                            class="bg-transparent border-none shadow-none p-0 ml-2"
+                                                            title="ลบ">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
                                                                 fill="none" viewBox="0 0 24 24" stroke="#ef4444">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -140,12 +206,14 @@
 <script>
 import { BehaviorService } from '../../api/behavior';
 import Update from './Update.vue';
+import UpdateAttendanceSetting from './UpdateAttendanceSetting.vue';
 import { useAuthStore } from '../../stores/auth';
 
 export default {
     name: 'BehaviorList',
     components: {
-        Update
+        Update,
+        UpdateAttendanceSetting,
     },
     props: {
         expandedTypeId: {
@@ -169,10 +237,13 @@ export default {
             editType: null,
             editData: null,
             auth: useAuthStore(),
+            conductSetting: null,
+            conductSettingOpen: false,
         };
     },
     mounted() {
         this.fetchBehaviortypes();
+        this.fetchConductSetting();
     },
     watch: {
         expandedTypeId(newVal) {
@@ -287,6 +358,18 @@ export default {
                 const res = await this.service.getBehaviorLevelsByBehaviorId(behaviorId);
                 this.behaviorLevels = res.data || [];
             }
+        },
+        async fetchConductSetting() {
+            try {
+                const res = await this.service.getAttendanceConductSetting();
+                this.conductSetting = res.data || null;
+            } catch (e) {
+                console.error('Fetch conduct setting error:', e);
+            }
+        },
+        openConductSettingModal() {
+            if (!this.conductSetting) return;
+            this.$refs.updateAttendanceSettingModal?.open(this.conductSetting);
         },
         async expandTypeAndBehavior(typeId, behaviorId) {
             this.expandedType = typeId;

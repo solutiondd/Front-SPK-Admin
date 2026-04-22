@@ -271,19 +271,57 @@ export class BehaviorService {
 
   async deleteBehaviorLevel(id) {
     try {
-      const token = this.token;
       const url = `${this.baseUrl}behaviorlevel/${id}`;
       const config = {
-        method: 'delete',
+        method: "delete",
         url,
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${this.token}`,
         },
       };
       const response = await axios(config);
       return response.data;
     } catch (error) {
-      console.error('Delete behaviorlevel error:', error);
+      console.error("Delete behaviorlevel error:", error);
+      throw error;
+    }
+  }
+
+  // AttendanceConductSetting
+  async updateAttendanceConductSetting(data) {
+    try {
+      let config = {
+        method: "put",
+        maxBodyLength: Infinity,
+        url: `${this.baseUrl}attendance-conduct-setting`,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.token}`,
+        },
+        data: JSON.stringify(data),
+      };
+      const response = await axios.request(config);
+      return response.data;
+    } catch (error) {
+      console.error("Update attendance conduct setting error:", error);
+      throw error;
+    }
+  }
+
+  async getAttendanceConductSetting() {
+    try {
+      let config = {
+        method: "get",
+        maxBodyLength: Infinity,
+        url: `${this.baseUrl}attendance-conduct-setting`,
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      };
+      const response = await axios.request(config);
+      return response.data;
+    } catch (error) {
+      console.error("Get attendance conduct setting error:", error);
       throw error;
     }
   }

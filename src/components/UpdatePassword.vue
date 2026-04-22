@@ -69,6 +69,7 @@ async function onSubmit() {
             `${import.meta.env.VITE_APP_BASE_URL}users/password`,
             params,
             {
+                skipAuthRedirect: true,
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'Authorization': `Bearer ${token}`,
@@ -90,7 +91,12 @@ async function onSubmit() {
             throw new Error(response.data.message || 'เปลี่ยนรหัสผ่านไม่สำเร็จ')
         }
     } catch (e) {
-        formError.value = e.response?.data?.message || e.message || 'เกิดข้อผิดพลาด'
+        const status = e.response?.status
+        if (status === 401) {
+            formError.value = 'ใส่รหัสผ่านเดิมผิด'
+        } else {
+            formError.value = e.response?.data?.message || e.message || 'เกิดข้อผิดพลาด'
+        }
         await Swal.fire({
             icon: 'error',
             title: 'เกิดข้อผิดพลาด',

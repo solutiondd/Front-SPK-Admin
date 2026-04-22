@@ -29,6 +29,12 @@ axios.interceptors.response.use(
   async (error) => {
     const status = error?.response?.status;
     const originalRequest = error.config;
+    const skipAuthRedirect = Boolean(originalRequest?.skipAuthRedirect);
+
+    if (status === 401 && skipAuthRedirect) {
+      return Promise.reject(error);
+    }
+    
     if (status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       if (localStorage.getItem("refresh_token")) {

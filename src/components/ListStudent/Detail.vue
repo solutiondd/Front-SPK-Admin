@@ -78,6 +78,8 @@
                     มาเรียน</div>
                 <div class="flex items-center gap-1"><span
                         class="inline-block w-4 h-4 rounded-full bg-yellow-400"></span> มาสาย</div>
+                <div class="flex items-center gap-1"><span
+                        class="inline-block w-4 h-4 rounded-full bg-emerald-400"></span> ลา</div>
                 <div class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded-full bg-red-500"></span>
                     ไม่ได้สแกน</div>
                 <div class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded-full bg-gray-400"></span>
@@ -97,6 +99,7 @@ import { useAuthStore } from '../../stores/auth'
 import reportApi from '../../api/report'
 import holidaysApi from '../../api/holidays'
 import { AcademicCalendarService } from '../../api/academiccalendar'
+import { LeaveService } from '../../api/leave'
 import AttendanceInfo from '../AttendanceInfo.vue'
 
 const emit = defineEmits(['close'])
@@ -128,10 +131,12 @@ const canOpenConduct = computed(() => auth.user?.role !== 'viewer')
 const attendances = ref([])
 const holidays = ref([])
 const academicTerms = ref([])
+const approvedLeaves = ref([])
 const loading = ref(false)
 const attendanceInfoRef = ref(null)
 const selectedAttendanceInfo = ref(null)
 const academicCalendarService = new AcademicCalendarService()
+const leaveService = new LeaveService()
 
 const calendar = computed(() => {
     const year = selectedYear.value
@@ -192,6 +197,40 @@ const normalizeDateInput = (value) => {
     return String(value).substring(0, 10)
 }
 
+const strToDate = (value) => {
+    const normalized = normalizeDateInput(value)
+    if (!normalized) return null
+    const [year, month, day] = normalized.split('-').map(Number)
+    if (!year || !month || !day) return null
+    return new Date(year, month - 1, day)
+}
+
+const approvedLeaveMap = computed(() => {
+    const map = {}
+    approvedLeaves.value.forEach((leaveRequest) => {
+        const startDate = strToDate(leaveRequest?.start_date)
+        const endDate = strToDate(leaveRequest?.end_date || leaveRequest?.start_date)
+        if (!startDate || !endDate) return
+
+        const leaveTypeName = leaveRequest?.leave_type_id?.name || 'ลา'
+        const reason = leaveRequest?.reason || ''
+        const cursor = new Date(startDate)
+        const lastDate = endDate < startDate ? startDate : endDate
+
+        while (cursor <= lastDate) {
+            const dateKey = dateToStr(cursor)
+            if (!map[dateKey]) {
+                map[dateKey] = {
+                    leaveType: leaveTypeName,
+                    reason,
+                }
+            }
+            cursor.setDate(cursor.getDate() + 1)
+        }
+    })
+    return map
+})
+
 const isTermOneOrTwo = (termName) => {
     const name = String(termName || '').toLowerCase()
     return /(เทอม\s*1|term\s*1|semester\s*1|ภาคเรียน\s*ที่?\s*1|เทอม\s*2|term\s*2|semester\s*2|ภาคเรียน\s*ที่?\s*2)/i.test(name)
@@ -228,6 +267,14 @@ const getDayTitle = (dateObj) => {
     if (!dateObj) return ''
     const holidayTitle = getHolidayTitle(dateObj)
     if (holidayTitle) return holidayTitle
+
+    const leaveInfo = approvedLeaveMap.value[dateToStr(dateObj)]
+    if (leaveInfo) {
+        if (leaveInfo.reason) {
+            return `ลา (${leaveInfo.leaveType}): ${leaveInfo.reason}`
+        }
+        return `ลา (${leaveInfo.leaveType})`
+    }
 
     const termStatus = getAcademicTermStatus(dateObj)
     return termStatus.label || 'ปิดเทอม'
@@ -295,6 +342,9 @@ const getDayClass = (dateObj) => {
     const isHoliday = holidays.value.some(h => h.date === dstr)
     if (isHoliday) return 'bg-gray-400 text-white'
 
+    const leaveInfo = approvedLeaveMap.value[dstr]
+    if (leaveInfo) return 'bg-emerald-400 text-emerald-900'
+
     if (isFuture) return ''
 
     return 'bg-red-500 text-white'
@@ -308,19 +358,37 @@ const fetchAttendance = async () => {
         const month = selectedMonth.value
         const start = `${year}-${String(month + 1).padStart(2, '0')}-01`
         const end = `${year}-${String(month + 1).padStart(2, '0')}-${String(new Date(year, month + 1, 0).getDate()).padStart(2, '0')}`
-        const res = await reportApi.getAttendanceReport({
-            start,
-            end,
-            role: 'student',
-            userid: props.student.userid || props.student.id,
-            page: 1,
-            limit: 1,
-        })
+        const leaveUserId = props.student?._id || props.student?.id || props.student?.userid || ''
+        const [res, holidaysRes, leaveRes] = await Promise.all([
+            reportApi.getAttendanceReport({
+                start,
+                end,
+                role: 'student',
+                userid: props.student.userid || props.student.id,
+                page: 1,
+                limit: 1,
+            }),
+            holidaysApi.getHolidaysByRange(start, end),
+            leaveService.getLeaveRequests({
+                start_date: start,
+                end_date: end,
+                status: 'approved',
+                user_id: leaveUserId,
+            }),
+        ])
+
+        const leaveRows = leaveRes?.data || []
+        approvedLeaves.value = Array.isArray(leaveRows)
+            ? leaveRows.filter((leaveRequest) => String(leaveRequest?.status || '').toLowerCase() === 'approved')
+            : []
+
         if (res.data && res.data.length > 0) {
             attendances.value = res.data[0].attendances || []
         } else {
             attendances.value = []
         }
+
+        holidays.value = Array.isArray(holidaysRes.data) ? holidaysRes.data : []
 
         const yearsToFetch = [year]
         // Term 2 can span into Jan-Mar of the next calendar year, so only then we also load previous year.
@@ -337,13 +405,11 @@ const fetchAttendance = async () => {
             const terms = result.value?.data?.terms
             return Array.isArray(terms) ? terms : []
         })
-
-        const holidaysRes = await holidaysApi.getHolidaysByRange(start, end)
-        holidays.value = Array.isArray(holidaysRes.data) ? holidaysRes.data : []
     } catch (e) {
         attendances.value = []
         holidays.value = []
         academicTerms.value = []
+        approvedLeaves.value = []
     } finally {
         loading.value = false
     }

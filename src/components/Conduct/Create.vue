@@ -133,15 +133,8 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-const props = defineProps({
-    preselectedStudent: {
-        type: Object,
-        default: null,
-    },
-})
-const emit = defineEmits(['student-selected', 'conduct-saved'])
 import { StudentService } from '../../api/student.js'
-import { ConductService } from '../../api/Conduct.js'
+import { ConductService } from '../../api/conduct.js'
 import { BehaviorService } from '../../api/behavior.js'
 import { MeritService } from '../../api/merit.js'
 import Swal from 'sweetalert2'
@@ -151,7 +144,7 @@ const studentService = new StudentService()
 const conductService = new ConductService()
 const behaviorService = new BehaviorService()
 const meritService = new MeritService()
-
+const emit = defineEmits(['student-selected', 'conduct-saved'])
 const searchStudentIdText = ref('')
 const searchStudentNameText = ref('')
 const studentIdResults = ref([])
@@ -178,6 +171,13 @@ const levelInput = ref(null);
 const studentIdInput = ref(null);
 const studentNameInput = ref(null);
 const descriptionInput = ref(null);
+
+const props = defineProps({
+    preselectedStudent: {
+        type: Object,
+        default: null,
+    },
+})
 
 const form = ref({
     description: '',
