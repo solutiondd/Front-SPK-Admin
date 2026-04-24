@@ -60,7 +60,7 @@
                         </div>
                         <div v-else class="flex items-center justify-center gap-2">
                             <div v-for="(model, idx) in item.modeling" :key="idx" class="tooltip tooltip-top"
-                                :data-tip="`${model.device.location} - ${statusLabel(model.status)}`">
+                                :data-tip="`${model.device.location} - ${statusLabel(model.status)}${model.result_msg ? ' (' + model.result_msg + ')' : ''}`">
                                 <div :class="[
                                     'w-3 h-3 rounded-full cursor-help transition-transform hover:scale-125',
                                     statusColorClass(model.status)
@@ -147,7 +147,7 @@
                 </div>
                 <div v-else class="flex flex-wrap gap-2">
                     <div v-for="(model, idx) in item.modeling" :key="idx" class="tooltip tooltip-top"
-                        :data-tip="`${model.device.location} - ${statusLabel(model.status)}`">
+                        :data-tip="`${model.device.location} - ${statusLabel(model.status)}${model.result_msg ? ' (' + model.result_msg + ')' : ''}`">
                         <div :class="[
                             'w-4 h-4 rounded-full cursor-help transition-transform hover:scale-125',
                             statusColorClass(model.status)

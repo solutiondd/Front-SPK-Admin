@@ -12,7 +12,7 @@
                     <div class="flex flex-col gap-2">
                         <button class="btn btn-outline" @click="importHolidaysByYear(currentYear)">ปีนี้ ({{
                             currentYearBE
-                        }})</button>
+                            }})</button>
                         <button class="btn btn-outline" @click="importHolidaysByYear(nextYear)">ปีหน้า ({{
                             nextYearBE }})</button>
                     </div>
@@ -206,6 +206,17 @@ const flatpickrConfig = {
         if (format === 'Y-m-d') return `${year}-${month}-${day}`
         if (format === 'd/m/Y') return `${day}/${month}/${year + 543}`
         return `${day}/${month}/${year + 543}`
+    },
+    parseDate: (dateStr, format) => {
+        if (format === 'd/m/Y') {
+            const parts = dateStr.split('/');
+            if (parts.length === 3) {
+                let year = parseInt(parts[2]);
+                if (year > 2400) year -= 543;
+                return new Date(year, parseInt(parts[1]) - 1, parseInt(parts[0]));
+            }
+        }
+        return new Date(dateStr);
     },
     enableTime: false,
     allowInput: true

@@ -2,50 +2,78 @@
     <div class="max-[570px]:pt-16">
         <div class="w-full bg-white rounded-lg shadow-sm p-6">
             <div class="mb-6">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">เช็คชื่อนักเรียน</h2>
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">เช็คชื่อ</h2>
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm font-medium text-gray-700 whitespace-nowrap">วันที่</label>
+                        <input v-model="selectedDate" type="date" class="input input-bordered input-sm"
+                            @change="loadUsers" />
+                    </div>
+                </div>
 
-                <!-- Filter Date -->
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 sm:items-end lg:grid-cols-3">
-                    <div class="w-full sm:col-span-2 lg:col-span-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">วันที่</label>
-                        <input v-model="selectedDate" type="date" class="input input-bordered w-full"
-                            @change="loadStudents" />
+                <!-- Filter Role and Search -->
+                <div class="grid grid-cols-2 gap-3 gap-y-3 items-end lg:grid-cols-4 lg:gap-4">
+                    <div class="w-full">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">ค้นหาชื่อ/รหัส</label>
+                        <input v-model="searchQuery" type="text" class="input input-bordered w-full"
+                            placeholder="ชื่อหรือรหัส..." @input="handleSearch" />
                     </div>
                     <div v-if="residentRole !== 'teacher'" class="w-full">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">ชั้นเรียน</label>
-                        <select v-model="selectedGrade" class="select select-bordered w-full"
-                            @change="handleGradeChange">
-                            <option value="">เลือกชั้นเรียน</option>
-                            <option v-for="grade in gradeList" :key="grade" :value="grade">
-                                {{ grade }}
-                            </option>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">ประเภท</label>
+                        <select v-model="selectedRole" class="select select-bordered w-full" @change="handleRoleChange">
+                            <option value="student">นักเรียน</option>
+                            <option value="teacher">ครู</option>
                         </select>
                     </div>
-                    <div v-if="residentRole !== 'teacher'" class="w-full">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">ห้องเรียน</label>
-                        <select v-model="selectedClassroom" class="select select-bordered w-full"
-                            @change="loadStudents">
-                            <option value="">เลือกห้องเรียน</option>
-                            <option v-for="classroom in filteredClassrooms" :key="classroom._id"
-                                :value="classroom.classroom">
-                                {{ classroom.classroom }}
-                            </option>
-                        </select>
-                    </div>
-                    <div v-if="residentRole === 'teacher'"
-                        class="w-full sm:col-span-2 lg:col-span-2 flex sm:justify-end">
-                        <div class="p-2 text-white bg-primary rounded-md text-center min-w-[120px]">
-                            <span class="block text-sm font-medium text-secondary">ชั้นปี / ห้อง</span>
-                            <span>{{ teacherGrade }}/{{ teacherClassroom }}</span>
+                    <template v-if="selectedRole === 'student'">
+                        <div v-if="residentRole !== 'teacher'" class="w-full">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ชั้นเรียน</label>
+                            <select v-model="selectedGrade" class="select select-bordered w-full"
+                                @change="handleGradeChange">
+                                <option value="">เลือกชั้นเรียน</option>
+                                <option v-for="grade in gradeList" :key="grade" :value="grade">
+                                    {{ grade }}
+                                </option>
+                            </select>
                         </div>
-                    </div>
+                        <div v-if="residentRole !== 'teacher'" class="w-full">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ห้องเรียน</label>
+                            <select v-model="selectedClassroom" class="select select-bordered w-full"
+                                @change="loadUsers">
+                                <option value="">เลือกห้องเรียน</option>
+                                <option v-for="classroom in filteredClassrooms" :key="classroom._id"
+                                    :value="classroom.classroom">
+                                    {{ classroom.classroom }}
+                                </option>
+                            </select>
+                        </div>
+                        <div v-if="residentRole === 'teacher'"
+                            class="w-full col-span-1 lg:col-start-4 flex justify-end">
+                            <div class="p-2 text-white bg-primary rounded-md text-center min-w-[120px]">
+                                <span class="block text-sm font-medium text-secondary">ชั้นปี / ห้อง</span>
+                                <span>{{ teacherGrade }}/{{ teacherClassroom }}</span>
+                            </div>
+                        </div>
+                    </template>
+                    <template v-else>
+                        <div v-if="residentRole !== 'teacher'" class="w-full col-span-2 lg:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">แผนก</label>
+                            <select v-model="selectedDepartment" class="select select-bordered w-full"
+                                @change="loadUsers">
+                                <option value="">เลือกแผนก</option>
+                                <option v-for="dept in departmentList" :key="dept" :value="dept">
+                                    {{ dept }}
+                                </option>
+                            </select>
+                        </div>
+                    </template>
                 </div>
             </div>
 
             <CheckNameTable :students="students" :selectedDate="selectedDate" :selectedGrade="selectedGrade"
-            :loading="loading" :attendanceData="attendanceData" :pendingLeaveApprovals="pendingLeaveApprovals"
-            @update:attendanceData="attendanceData = $event"
-            @update:pendingLeaveApprovals="pendingLeaveApprovals = $event" />
+                :loading="loading" :attendanceData="attendanceData" :pendingLeaveApprovals="pendingLeaveApprovals"
+                :selectedRole="selectedRole" @update:attendanceData="attendanceData = $event"
+                @update:pendingLeaveApprovals="pendingLeaveApprovals = $event" />
         </div>
     </div>
 </template>
@@ -53,25 +81,38 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { StudentService } from '../../api/student';
+import { TeacherService } from '../../api/teacher';
 import { ClassRoomService } from '../../api/class-room';
+import { DepartmentService } from '../../api/department';
+import { PositionService } from '../../api/position';
 import reportApi from '../../api/report';
 import { LeaveService } from '../../api/leave';
 import CheckNameTable from '../../components/CheckName/Table.vue';
 import Swal from 'sweetalert2';
 
 const studentService = new StudentService();
+const teacherService = new TeacherService();
 const classRoomService = new ClassRoomService();
+const departmentService = new DepartmentService();
+const positionService = new PositionService();
 const leaveService = new LeaveService();
 const residentRole = localStorage.getItem('residentRole') || '';
 const teacherGrade = localStorage.getItem('grade') || '';
 const teacherClassroom = localStorage.getItem('classroom') || '';
 
 const students = ref([]);
+const allStudents = ref([]);
 const classrooms = ref([]);
+const departments = ref([]);
+const positions = ref([]);
 const loading = ref(false);
 const selectedDate = ref(new Date().toISOString().split('T')[0]);
-const selectedGrade = ref(residentRole === 'teacher' ? teacherGrade : '');
-const selectedClassroom = ref(residentRole === 'teacher' ? teacherClassroom : '');
+const selectedRole = ref('student');
+const selectedGrade = ref(residentRole === 'teacher' && teacherGrade ? teacherGrade : '');
+const selectedClassroom = ref(residentRole === 'teacher' && teacherClassroom ? teacherClassroom : '');
+const selectedDepartment = ref('');
+const searchQuery = ref('');
+let searchTimer = null;
 const attendanceData = ref({});
 const pendingLeaveApprovals = ref({});
 
@@ -96,19 +137,116 @@ const filteredClassrooms = computed(() => {
     return classrooms.value.filter(c => c.grade === selectedGrade.value);
 });
 
+const departmentList = computed(() => {
+    return departments.value.map(d => d.name_th || d.name || '').filter(Boolean);
+});
+
 const loadClassrooms = async () => {
     try {
         const response = await classRoomService.getClassRooms();
         classrooms.value = response.data || [];
+
+        if (residentRole !== 'teacher' && selectedRole.value === 'student') {
+            const grades = Array.from(new Set(classrooms.value.map(c => c.grade))).sort((a, b) => {
+                const numA = parseInt(a.split('.')[1]);
+                const numB = parseInt(b.split('.')[1]);
+                return numA - numB;
+            });
+            if (grades.length > 0) {
+                selectedGrade.value = grades[0];
+                const firstClassroom = classrooms.value.find(c => c.grade === grades[0]);
+                if (firstClassroom) {
+                    selectedClassroom.value = firstClassroom.classroom;
+                    await loadUsers();
+                }
+            }
+        }
     } catch (error) {
         Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดรายชื่อห้องเรียนได้', 'error');
         console.error('Load classrooms error:', error);
     }
 };
 
+const loadDepartmentsAndPositions = async () => {
+    try {
+        const [deptRes, posRes] = await Promise.all([
+            departmentService.getDepartments(),
+            positionService.getPositions()
+        ]);
+        departments.value = deptRes.data || [];
+        positions.value = posRes.data || [];
+    } catch (error) {
+        console.error('Load departments and positions error:', error);
+    }
+};
+
 const handleGradeChange = () => {
     selectedClassroom.value = '';
-    loadStudents();
+    searchQuery.value = '';
+    loadUsers();
+};
+
+const handleSearch = () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(async () => {
+        const q = searchQuery.value.trim();
+        if (!q) {
+            students.value = allStudents.value;
+            return;
+        }
+        if (residentRole !== 'teacher' && selectedRole.value === 'student') {
+            loading.value = true;
+            try {
+                const isNumeric = /^\d+$/.test(q);
+                const response = await studentService.searchStudent({
+                    name: isNumeric ? '' : q,
+                    userid: isNumeric ? q : '',
+                });
+                const result = response.data || [];
+                students.value = result;
+                await mapDailyStatus(result, 'student');
+            } catch (error) {
+                console.error('Search student error:', error);
+            } finally {
+                loading.value = false;
+            }
+        } else {
+            const lower = q.toLowerCase();
+            students.value = allStudents.value.filter(s => {
+                const name = [s.pre_name, s.first_name, s.last_name, s.name].filter(Boolean).join(' ').toLowerCase();
+                const userid = String(s.userid || '').toLowerCase();
+                return name.includes(lower) || userid.includes(lower);
+            });
+        }
+    }, 300);
+};
+
+const handleRoleChange = () => {
+    selectedGrade.value = '';
+    selectedClassroom.value = '';
+    selectedDepartment.value = '';
+    searchQuery.value = '';
+    students.value = [];
+    allStudents.value = [];
+    attendanceData.value = {};
+    pendingLeaveApprovals.value = {};
+    if (selectedRole.value === 'teacher') {
+        loadUsers();
+    } else {
+        const grades = Array.from(new Set(classrooms.value.map(c => c.grade))).sort((a, b) => {
+            const numA = parseInt(a.split('.')[1]);
+            const numB = parseInt(b.split('.')[1]);
+            return numA - numB;
+        });
+        if (grades.length > 0) {
+            selectedGrade.value = grades[0];
+            const firstClassroom = classrooms.value.find(c => c.grade === grades[0]);
+            if (firstClassroom) {
+                selectedClassroom.value = firstClassroom.classroom;
+                loadUsers();
+            }
+        }
+    }
 };
 
 const hasAttendanceOnDate = (student, date) => {
@@ -127,11 +265,21 @@ const getLeaveStudentKeys = (leaveRequest) => {
     return [user?._id, user?.userid, user].filter(Boolean).map((value) => String(value));
 };
 
-const mapDailyStatus = async (studentList) => {
-    if (!selectedDate.value || !selectedGrade.value || !selectedClassroom.value) {
+const mapDailyStatus = async (studentList, roleType = 'student') => {
+    if (!selectedDate.value) {
         attendanceData.value = {};
         pendingLeaveApprovals.value = {};
         return;
+    }
+
+    if (roleType === 'student' && (!selectedGrade.value || !selectedClassroom.value)) {
+        attendanceData.value = {};
+        pendingLeaveApprovals.value = {};
+        return;
+    }
+
+    if (roleType === 'teacher' && !selectedDepartment.value) {
+        // Load attendance for all teachers without department filter
     }
 
     const studentKeys = new Set();
@@ -141,19 +289,26 @@ const mapDailyStatus = async (studentList) => {
         });
     });
 
+    let attendanceParams = {
+        start: selectedDate.value,
+        end: selectedDate.value,
+        role: roleType,
+        name: '',
+        department: '',
+        userid: '',
+        page: 1,
+        limit: 50,
+    };
+
+    if (roleType === 'student') {
+        attendanceParams.grade = selectedGrade.value;
+        attendanceParams.classroom = selectedClassroom.value;
+    } else {
+        attendanceParams.department = selectedDepartment.value;
+    }
+
     const [attendanceResponse, leaveResponse] = await Promise.all([
-        reportApi.getAttendanceReport({
-            start: selectedDate.value,
-            end: selectedDate.value,
-            role: 'student',
-            name: '',
-            department: '',
-            userid: '',
-            grade: selectedGrade.value,
-            classroom: selectedClassroom.value,
-            page: 1,
-            limit: 50,
-        }),
+        reportApi.getAttendanceReport(attendanceParams),
         leaveService.getLeaveRequests({
             start_date: selectedDate.value,
             end_date: selectedDate.value,
@@ -252,39 +407,58 @@ const mapDailyStatus = async (studentList) => {
     pendingLeaveApprovals.value = nextPendingLeaveApprovals;
 };
 
-const loadStudents = async () => {
-    if (residentRole === 'teacher') {
-        selectedGrade.value = teacherGrade;
-        selectedClassroom.value = teacherClassroom;
-    }
+const loadUsers = async () => {
+    if (selectedRole.value === 'student') {
+        if (residentRole === 'teacher') {
+            selectedGrade.value = teacherGrade;
+            selectedClassroom.value = teacherClassroom;
+        }
 
-    if (!selectedClassroom.value) {
-        students.value = [];
-        attendanceData.value = {};
-        pendingLeaveApprovals.value = {};
-        return;
-    }
+        if (!selectedClassroom.value) {
+            students.value = [];
+            attendanceData.value = {};
+            pendingLeaveApprovals.value = {};
+            return;
+        }
 
-    loading.value = true;
-    try {
-        const response = await studentService.getStudents(selectedGrade.value, selectedClassroom.value);
-        const studentList = response.data || [];
-        students.value = studentList;
-        await mapDailyStatus(studentList);
-    } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดรายชื่อนักเรียนได้', 'error');
-        console.error('Load students error:', error);
-    } finally {
-        loading.value = false;
+        loading.value = true;
+        try {
+            const response = await studentService.getStudents(selectedGrade.value, selectedClassroom.value);
+            const studentList = response.data || [];
+            allStudents.value = studentList;
+            students.value = studentList;
+            await mapDailyStatus(studentList, 'student');
+        } catch (error) {
+            Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดรายชื่อนักเรียนได้', 'error');
+            console.error('Load students error:', error);
+        } finally {
+            loading.value = false;
+        }
+    } else {
+        loading.value = true;
+        try {
+            const response = await teacherService.getTeachers('', selectedDepartment.value);
+            const teacherList = response.data || [];
+            allStudents.value = teacherList;
+            students.value = teacherList;
+            await mapDailyStatus(teacherList, 'teacher');
+        } catch (error) {
+            Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดรายชื่อครูได้', 'error');
+            console.error('Load teachers error:', error);
+        } finally {
+            loading.value = false;
+        }
     }
 };
 
 onMounted(() => {
     selectedDate.value = new Date().toISOString().split('T')[0];
     loadClassrooms();
+    loadDepartmentsAndPositions();
 
     if (residentRole === 'teacher') {
-        loadStudents();
+        selectedRole.value = 'student';
+        loadUsers();
     }
 });
 </script>

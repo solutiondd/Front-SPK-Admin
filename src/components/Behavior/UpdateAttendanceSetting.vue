@@ -29,7 +29,7 @@
                     <span>เปิดใช้งานหักคะแนนขาดเรียน</span>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div class="form-control">
+                    <!-- <div class="form-control">
                         <label class="label">
                             <span class="label-text">เวลาตัด (ขาดเรียน)</span>
                             <span class="label-text-alt text-base-content/50">ไม่บังคับ</span>
@@ -41,7 +41,7 @@
                             <input type="checkbox" v-model="absentTimeEnabled" class="toggle toggle-sm toggle-primary"
                                 @change="onAbsentTimeToggle" />
                         </div>
-                    </div>
+                    </div> -->
                     <div class="form-control">
                         <label class="label"><span class="label-text">คะแนนที่หัก</span></label>
                         <input type="number" v-model.number="form.absent.score" class="input input-bordered input-sm" />
