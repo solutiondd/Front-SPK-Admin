@@ -2,7 +2,7 @@
     <div class="w-full space-y-6 max-[570px]:pt-14">
         <div class="flex flex-col md:flex-row md:justify-between md:items-center text-white gap-2">
             <h2 class="text-lg md:text-3xl font-bold">ตารางการลา</h2>
-            <div class="flex flex-row gap-2 items-stretch md:items-center">
+            <div class="flex flex-row gap-2 items-stretch md:items-center justify-end md:justify-center">
                 <input v-model="filters.start_date" type="date" :max="today"
                     class="text-sm px-2 py-1 bg-white border border-base-300 focus:outline-none focus:ring-2 focus:ring-primary rounded shadow-sm text-base-content" />
                 <span>-</span>

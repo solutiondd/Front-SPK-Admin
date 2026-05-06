@@ -28,7 +28,7 @@
                     <input type="file" accept="image/*" multiple @change="onImagesChange"
                         class="file-input file-input-bordered file-input-sm w-full max-w-xs" />
                     <p v-if="imageFiles.length" class="text-xs text-success mt-1">รูปภาพที่เลือก: {{ imageFiles.length
-                    }} ไฟล์</p>
+                        }} ไฟล์</p>
                     <p class="text-xs text-gray-500 mt-1">กรุณาตั้งชื่อไฟล์รูปภาพเป็นรหัสครู เช่น <b>6200.jpg</b>
                         เพื่อให้ระบบแมปข้อมูลอัตโนมัติ</p>
                 </div>
@@ -273,6 +273,7 @@ async function handleImport() {
         }
 
         const importedTeachers = [];
+        const failedTeachers = [];
         for (const teacher of previewData.value) {
             const formData = {
                 userid: teacher.userid,
@@ -288,27 +289,59 @@ async function handleImport() {
                 const response = await teacherService.createTeacher(formData);
                 if (response.message === 'Success') {
                     importedTeachers.push(response.data);
+                } else {
+                    failedTeachers.push({
+                        userid: teacher.userid,
+                        name: `${teacher.pre_name}${teacher.first_name} ${teacher.last_name}`,
+                        reason: response.message || 'ไม่ทราบสาเหตุ'
+                    });
                 }
             } catch (err) {
                 const apiError = err?.response?.data;
+                let reason = apiError?.error || apiError?.message || err.message || 'ไม่ทราบสาเหตุ';
+                // แปล error ที่พบบ่อย
                 if (apiError?.message === 'Validation error' && apiError?.error?.includes('"pre_name" must be one of')) {
-                    Swal.fire('ข้อผิดพลาด', `คำนำหน้าของ ${teacher.first_name} ${teacher.last_name} ไม่ถูกต้อง กรุณาตรวจสอบและแก้ไขให้เป็นรูปแบบที่ถูกต้อง เช่น นาย, นาง, นางสาว, Mr., Ms., Mrs.`, 'error');
-                    break;
+                    reason = 'คำนำหน้าไม่ถูกต้อง กรุณาตรวจสอบ เช่น นาย, นาง, นางสาว, Mr., Ms., Mrs.';
                 } else if (apiError?.message === 'Duplicate data' && apiError?.error?.includes('duplicate teacher userid')) {
-                    const duplicateId = teacher.userid;
-                    Swal.fire('ข้อผิดพลาด', `รหัส ${duplicateId} มีคนใช้งานแล้ว กรุณาตรวจสอบข้อมูลในไฟล์ Excel`, 'error');
-                    break;
-                } else {
-                    console.error(`Error importing teacher ${teacher.userid}:`, err);
+                    reason = 'รหัสนี้มีคนใช้งานแล้ว กรุณาตรวจสอบข้อมูลในไฟล์ Excel';
+                } else if (reason === '"last_name" is not allowed to be empty' || reason === 'last_name" is not allowed to be empty') {
+                    reason = 'กรุณากรอกนามสกุล';
+                } else if (/fails to match the required pattern/.test(reason) && /last_name/.test(reason)) {
+                    reason = 'นามสกุลต้องเป็นภาษาไทยหรืออังกฤษเท่านั้น';
+                } else if (/fails to match the required pattern/.test(reason) && /first_name/.test(reason)) {
+                    reason = 'ชื่อต้องเป็นภาษาไทยหรืออังกฤษเท่านั้น';
+                } else if (/is required/.test(reason)) {
+                    reason = 'กรุณากรอกข้อมูลให้ครบถ้วน';
                 }
+                failedTeachers.push({
+                    userid: teacher.userid,
+                    name: `${teacher.pre_name}${teacher.first_name} ${teacher.last_name}`,
+                    reason
+                });
             }
         }
 
-        if (importedTeachers.length > 0) {
-            Swal.fire('สำเร็จ', `นำเข้าข้อมูลครูสำเร็จ ${importedTeachers.length} รายการ`, 'success');
-            emit('success', importedTeachers);
-            closeModal();
+        let msg = `<div style='text-align:left;'>`
+            + `บันทึกสำเร็จ <b>${importedTeachers.length}</b> รายการ`
+            + `<br>บันทึกไม่สำเร็จ <b>${failedTeachers.length}</b> รายการ`;
+        if (failedTeachers.length > 0) {
+            msg += `<br><br><b>รายการที่บันทึกไม่สำเร็จ:</b>`;
+            msg += `<div style='max-height:220px;overflow:auto;'><table style='border-collapse:collapse;width:100%;font-size:13px;'>`;
+            msg += `<thead><tr style='background:#f3f4f6;'><th style='border:1px solid #ddd;padding:4px;'>รหัส</th><th style='border:1px solid #ddd;padding:4px;'>ชื่อ</th><th style='border:1px solid #ddd;padding:4px;'>สาเหตุ</th></tr></thead><tbody>`;
+            msg += failedTeachers.map(f => {
+                return `<tr><td style='border:1px solid #ddd;padding:4px;'>${f.userid}</td><td style='border:1px solid #ddd;padding:4px;'>${f.name}</td><td style='border:1px solid #ddd;padding:4px;color:#b91c1c;'>${f.reason}</td></tr>`;
+            }).join('');
+            msg += `</tbody></table></div>`;
         }
+        msg += `</div>`;
+        Swal.fire({
+            title: 'สำเร็จ',
+            html: msg,
+            icon: failedTeachers.length > 0 ? 'warning' : 'success',
+            width: 600
+        });
+        emit('success', importedTeachers);
+        closeModal();
     } catch (e) {
         console.error('Import error:', e);
         const errorMessage = e.response?.data?.message || 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล';

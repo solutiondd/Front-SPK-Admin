@@ -54,7 +54,7 @@ async function handlePromote() {
             document.getElementById('app').removeAttribute('aria-hidden')
         }
     })
-    if (!confirm2.isConfirmed) return
+    // if (!confirm2.isConfirmed) return
 
     // Confirm 3
     // const confirm3 = await Swal.fire({
@@ -74,12 +74,12 @@ async function handlePromote() {
 
     loading.value = true
     try {
-        await classRoomService.promoteClassRoom({})
         await studentService.deleteAllByGrade('ม.3')
         await studentService.deleteAllByGrade('ม.6')
+        await classRoomService.promoteClassRoom({})
         await Swal.fire({
             icon: 'success',
-            title: 'เลื่อนชั้นและลบข้อมูลสำเร็จ',
+            title: 'ลบข้อมูลและเลื่อนชั้นสำเร็จ',
             showConfirmButton: false,
             timer: 1800,
             didOpen: () => {
@@ -91,7 +91,7 @@ async function handlePromote() {
         await Swal.fire({
             icon: 'error',
             title: 'เกิดข้อผิดพลาด',
-            text: error.response?.data?.error || 'ไม่สามารถเลื่อนชั้นหรือลบข้อมูลได้',
+            text: error.response?.data?.error || 'ไม่สามารถลบข้อมูลหรืเลื่อนชั้นได้',
             confirmButtonColor: '#2563eb',
             didOpen: () => {
                 document.getElementById('app').removeAttribute('aria-hidden')

@@ -28,7 +28,7 @@
                     <input type="file" accept="image/*" multiple @change="onImagesChange"
                         class="file-input file-input-bordered file-input-sm w-full max-w-xs" />
                     <p v-if="imageFiles.length" class="text-xs text-success mt-1">รูปภาพที่เลือก: {{ imageFiles.length
-                        }} ไฟล์</p>
+                    }} ไฟล์</p>
                     <p class="text-xs text-gray-500 mt-1">กรุณาตั้งชื่อไฟล์รูปภาพเป็นรหัสนักเรียน เช่น <b>6200.jpg</b>
                         เพื่อให้ระบบแมปข้อมูลอัตโนมัติ</p>
                 </div>
@@ -272,6 +272,7 @@ async function handleImport() {
         }
 
         const importedStudents = [];
+        const failedStudents = [];
         for (const student of previewData.value) {
             let existing = null;
             try {
@@ -297,9 +298,20 @@ async function handleImport() {
                     const response = await studentService.updateStudent(oldData._id, formData);
                     if (response.message === 'Success') {
                         importedStudents.push(response.data);
+                    } else {
+                        failedStudents.push({
+                            userid: student.userid,
+                            name: `${student.pre_name}${student.first_name} ${student.last_name}`,
+                            reason: response.message || 'ไม่ทราบสาเหตุ'
+                        });
                     }
                 } catch (err) {
                     console.error(`Error updating student ${student.userid}:`, err);
+                    failedStudents.push({
+                        userid: student.userid,
+                        name: `${student.pre_name}${student.first_name} ${student.last_name}`,
+                        reason: err.response?.data?.error || err.message || 'ไม่ทราบสาเหตุ'
+                    });
                 }
             } else {
                 formData = {
@@ -315,14 +327,54 @@ async function handleImport() {
                     const response = await studentService.createStudent(formData);
                     if (response.message === 'Success') {
                         importedStudents.push(response.data);
+                    } else {
+                        failedStudents.push({
+                            userid: student.userid,
+                            name: `${student.pre_name}${student.first_name} ${student.last_name}`,
+                            reason: response.message || 'ไม่ทราบสาเหตุ'
+                        });
                     }
                 } catch (err) {
                     console.error(`Error creating student ${student.userid}:`, err);
+                    failedStudents.push({
+                        userid: student.userid,
+                        name: `${student.pre_name}${student.first_name} ${student.last_name}`,
+                        reason: err.response?.data?.error || err.message || 'ไม่ทราบสาเหตุ'
+                    });
                 }
             }
         }
 
-        Swal.fire('สำเร็จ', `นำเข้าข้อมูลนักเรียนสำเร็จ ${importedStudents.length} รายการ`, 'success');
+        let msg = `<div style='text-align:left;'>`
+            + `บันทึกสำเร็จ <b>${importedStudents.length}</b> รายการ`
+            + `<br>บันทึกไม่สำเร็จ <b>${failedStudents.length}</b> รายการ`;
+        if (failedStudents.length > 0) {
+            msg += `<br><br><b>รายการที่บันทึกไม่สำเร็จ:</b>`;
+            msg += `<div style='max-height:220px;overflow:auto;'><table style='border-collapse:collapse;width:100%;font-size:13px;'>`;
+            msg += `<thead><tr style='background:#f3f4f6;'><th style='border:1px solid #ddd;padding:4px;'>รหัส</th><th style='border:1px solid #ddd;padding:4px;'>ชื่อ</th><th style='border:1px solid #ddd;padding:4px;'>สาเหตุ</th></tr></thead><tbody>`;
+            msg += failedStudents.map(f => {
+                // แปล error ที่พบบ่อย
+                let reason = f.reason;
+                if (reason === '"last_name" is not allowed to be empty' || reason === 'last_name" is not allowed to be empty') {
+                    reason = 'กรุณากรอกนามสกุล';
+                } else if (/fails to match the required pattern/.test(reason) && /last_name/.test(reason)) {
+                    reason = 'นามสกุลต้องเป็นภาษาไทยหรืออังกฤษเท่านั้น';
+                } else if (/fails to match the required pattern/.test(reason) && /first_name/.test(reason)) {
+                    reason = 'ชื่อต้องเป็นภาษาไทยหรืออังกฤษเท่านั้น';
+                } else if (/is required/.test(reason)) {
+                    reason = 'กรุณากรอกข้อมูลให้ครบถ้วน';
+                }
+                return `<tr><td style='border:1px solid #ddd;padding:4px;'>${f.userid}</td><td style='border:1px solid #ddd;padding:4px;'>${f.name}</td><td style='border:1px solid #ddd;padding:4px;color:#b91c1c;'>${reason}</td></tr>`;
+            }).join('');
+            msg += `</tbody></table></div>`;
+        }
+        msg += `</div>`;
+        Swal.fire({
+            title: 'สำเร็จ',
+            html: msg,
+            icon: failedStudents.length > 0 ? 'warning' : 'success',
+            width: 600
+        });
         emit('success', importedStudents);
         closeModal();
     } catch (e) {
