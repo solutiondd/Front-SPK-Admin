@@ -341,7 +341,7 @@ async function exportDocxReport() {
                                         borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } }
                                     }),
                                     new TableCell({
-                                        children: [new Paragraph({ children: [new TextRun({ text: 'งานบุคคล โรงเรียนจักรคำคณาทร จังหวัดลำพูน', font, size: 32 })] })],
+                                        children: [new Paragraph({ children: [new TextRun({ text: 'งานบุคคล โรงเรียนสารคามพิทยาคม จังหวัดมหาสารคาม', font, size: 32 })] })],
                                         columnSpan: 3,
                                         width: { size: 85, type: WidthType.PERCENTAGE },
                                         borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } }
@@ -392,7 +392,7 @@ async function exportDocxReport() {
                                         borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } }
                                     }),
                                     new TableCell({
-                                        children: [new Paragraph({ children: [new TextRun({ text: 'ผู้อำนวยการโรงเรียนจักรคำคณาทร จังหวัดลำพูน', font, size: 32 })] })],
+                                        children: [new Paragraph({ children: [new TextRun({ text: 'ผู้อำนวยการโรงเรียนสารคามพิทยาคม จังหวัดมหาสารคาม', font, size: 32 })] })],
                                         columnSpan: 3,
                                         width: { size: 85, type: WidthType.PERCENTAGE },
                                         borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } }
@@ -496,7 +496,7 @@ async function exportDocxReport() {
                     new Paragraph({ text: '', spacing: { after: 200 } }),
                     new Paragraph({ children: [new TextRun({ text: 'ลงชื่อ....................................................ผู้บันทึกข้อมูล', font, size: 32 })], alignment: AlignmentType.RIGHT }),
                     new Paragraph({ children: [new TextRun({ text: 'ลงชื่อ....................................................รองผู้อำนวยการโรงเรียน ผู้ตรวจสอบข้อมูล', font, size: 32 })], alignment: AlignmentType.RIGHT }),
-                    new Paragraph({ children: [new TextRun({ text: 'ลงชื่อ....................................................ผู้อำนวยการโรงเรียนจักรคำคณาทร จังหวัดลำพูน', font, size: 32 })], alignment: AlignmentType.RIGHT }),
+                    new Paragraph({ children: [new TextRun({ text: 'ลงชื่อ....................................................ผู้อำนวยการโรงเรียนสารคามพิทยาคม จังหวัดมหาสารคาม', font, size: 32 })], alignment: AlignmentType.RIGHT }),
                 ]
             }]
         })

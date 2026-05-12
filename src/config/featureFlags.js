@@ -3,21 +3,18 @@
 export default {
   // ฟีเจอร์สำหรับตารางเข้า-ออก
   attendance: {
-    enableLineupColumn: import.meta.env.VITE_ENABLE_LINEUP_COLUMN === "false",
+    enableLineupColumn: "true", // คอลัมแสดงข้อมูลเวลา เข้าแถว
   },
 
   // ฟีเจอร์สำหรับหน้าเช็คชื่อ
   checkName: {
     // person_confirmation: ต้องมี usecase = person_confirmation
     // any_timestamp: มี timeStamps มากกว่า 0 ก็ถือว่ามา
-    presentMode:
-      import.meta.env.VITE_CHECKNAME_PRESENT_MODE || "any_timestamp",
+    presentMode:"person_confirmation", // โหมดการพิจารณาว่ามาแล้วหรือยังสำหรับหน้าเช็คชื่อ
   },
 
   // ฟีเจอร์สำหรับอุปกรณ์
   device: {
-    enableUseCase: import.meta.env.VITE_ENABLE_DEVICE_USECASE === "false",
+    enableUseCase: "true", // Use Case สำหรับการจัดการอุปกรณ์
   },
-
-  // ฟีเจอร์อื่น ๆ (เพิ่มได้ตามต้องการ)
 };

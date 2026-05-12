@@ -491,7 +491,7 @@ const liveDocumentPreview = computed(() => {
         return `
             <div class="text-xs leading-5">
                 <div class="text-center mb-3 pb-2 border-b">
-                    <p class="font-bold">โรงเรียนจักรคำคณาทร</p>
+                    <p class="font-bold">โรงเรียนสารคามพิทยาคมคม</p>
                     <p class="text-gray-400">หนังสือแจ้งนักเรียนประพฤติผิดระเบียบ (จค.กก 1)</p>
                 </div>
                 <p class="mb-1 border-t border-b py-1"><strong>วันที่:</strong> ${formatDate(documentDateStr.value)}</p>
@@ -514,7 +514,7 @@ const liveDocumentPreview = computed(() => {
         return `
             <div class="text-xs leading-5">
                 <div class="text-center mb-3 pb-2 border-b">
-                    <p class="font-bold">โรงเรียนจักรคำคณาทร</p>
+                    <p class="font-bold">โรงเรียนสารคามพิทยาคมคม</p>
                     <p class="text-gray-400">แบบบันทึกการสอบสวน (จค.กก 1/1)</p>
                 </div>
                 <p class="mb-1">นักเรียน <strong class="text-blue-600">${esc(studentName)}</strong></p>
@@ -539,7 +539,7 @@ const liveDocumentPreview = computed(() => {
         return `
             <div class="text-xs leading-5">
                 <div class="text-center mb-3 pb-2 border-b">
-                    <p class="font-bold">โรงเรียนจักรคำคณาทร</p>
+                    <p class="font-bold">โรงเรียนสารคามพิทยาคมคม</p>
                     <p class="text-gray-400">หนังสือการพิจารณาการลงโทษ (จค.กก 2)</p>
                 </div>
                 <p class="mb-1">เรียน ผู้อำนวยการโรงเรียน</p>
@@ -566,7 +566,7 @@ const liveDocumentPreview = computed(() => {
         return `
             <div class="text-xs leading-5">
                 <div class="text-center mb-3 pb-2 border-b">
-                    <p class="font-bold">โรงเรียนจักรคำคณาทร</p>
+                    <p class="font-bold">โรงเรียนสารคามพิทยาคมคม</p>
                     <p class="text-gray-400">หนังสือเชิญผู้ปกครองมารับทราบ (จค.กก 4)</p>
                 </div>
                 <p class="mb-1">เรียน ผู้ปกครอง/ผู้อุปการะของ</p>
@@ -588,7 +588,7 @@ const liveDocumentPreview = computed(() => {
         return `
             <div class="text-xs leading-5">
                 <div class="text-center mb-3 pb-2 border-b">
-                    <p class="font-bold">โรงเรียนจักรคำคณาทร</p>
+                    <p class="font-bold">โรงเรียนสารคามพิทยาคมคม</p>
                     <p class="text-gray-400">หนังสือทัณฑ์บน (จค.กก 5)</p>
                 </div>
                 <div class="border-t border-b py-1 mb-2">
@@ -627,7 +627,7 @@ const documentTemplatePreview = computed(() => {
     const templates = {
         'จค.กก 1': `
             <div class="text-center mb-6">
-                <h2 class="text-lg font-bold">โรงเรียนจักรคำคณาทร</h2>
+                <h2 class="text-lg font-bold">โรงเรียนสารคามพิทยาคมคม</h2>
                 <p class="text-sm">หนังสือแจ้งนักเรียนประพฤติผิดระเบียบ (จค.กก 1)</p>
             </div>
             <div class="border-t-2 border-b-2 py-3 mb-4">
@@ -650,7 +650,7 @@ const documentTemplatePreview = computed(() => {
         `,
         'จค.กก 1/1': `
             <div class="text-center mb-6">
-                <h2 class="text-lg font-bold">โรงเรียนจักรคำคณาทร</h2>
+                <h2 class="text-lg font-bold">โรงเรียนสารคามพิทยาคมคมคมคม</h2>
                 <p class="text-sm">แบบบันทึกการสอบสวน (จค.กก 1/1)</p>
             </div>
             <p class="mb-3">นักเรียน ${studentName} ชั้น ${className} เลขประจำตัว ${studentId}</p>
@@ -672,7 +672,7 @@ const documentTemplatePreview = computed(() => {
         `,
         'จค.กก 2': `
             <div class="text-center mb-6">
-                <h2 class="text-lg font-bold">โรงเรียนจักรคำคณาทร</h2>
+                <h2 class="text-lg font-bold">โรงเรียนสารคามพิทยาคมคมคมคมคมคม</h2>
                 <p class="text-sm">หนังสือการพิจารณาการลงโทษ (จค.กก 2)</p>
             </div>
             <p class="mb-3">เรียน ผู้อำนวยการโรงเรียน </p>
@@ -699,7 +699,7 @@ const documentTemplatePreview = computed(() => {
         `,
         'จค.กก 4': `
             <div class="text-center mb-6">
-                <h2 class="text-lg font-bold">โรงเรียนจักรคำคณาทร</h2>
+                <h2 class="text-lg font-bold">โรงเรียนสารคามพิทยาคมคมคมคมคมคม</h2>
                 <p class="text-sm">หนังสือเชิญผู้ปกครองมารับทราบ (จค.กก 4)</p>
             </div>
             <p class="mb-3">เรียน ผู้ปกครอง/ผู้อุปการะของ </p>
@@ -718,7 +718,7 @@ const documentTemplatePreview = computed(() => {
         `,
         'จค.กก 5': `
             <div class="text-center mb-6">
-                <h2 class="text-lg font-bold">โรงเรียนจักรคำคณาทร</h2>
+                <h2 class="text-lg font-bold">โรงเรียนสารคามพิทยาคมคม</h2>
                 <p class="text-sm">หนังสือทัณฑ์บน (จค.กก 5)</p>
             </div>
             <div class="border-t-2 border-b-2 py-2 mb-4 text-sm">
@@ -1076,7 +1076,7 @@ async function exportDocx() {
                         }),
                         createParagraph([
                             createRun('ส่วนราชการ ', { bold: true }),
-                            createRun('โรงเรียนจักรคำคณาทร  จังหวัดลำพูน'),
+                            createRun('โรงเรียนสารคามพิทยาคม  จังหวัดมหาสารคาม'),
                         ]),
                         new Table({
                             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -1314,7 +1314,7 @@ async function exportDocx() {
                         createParagraph('แบบบันทึกการสอบสวนนักเรียนประพฤติผิดระเบียบของโรงเรียน', {
                             alignment: AlignmentType.CENTER, bold: true, size: 28, spacing: { after: 120 },
                         }),
-                        createParagraph('โรงเรียนจักรคำคณาทร  จังหวัดลำพูน', { alignment: AlignmentType.RIGHT, spacing: { after: 40 } }),
+                        createParagraph('โรงเรียนสารคามพิทยาคม  จังหวัดมหาสารคาม', { alignment: AlignmentType.RIGHT, spacing: { after: 40 } }),
                         createParagraph([
                             createRun('วันที่  '),
                             createRun(`${dateParts.day}  เดือน  ${dateParts.month}  พ.ศ.  ${dateParts.year}`),
@@ -1368,10 +1368,10 @@ async function exportDocx() {
                             indent: { firstLine: 720 },
                         }),
                         new Paragraph({
-                            children: [createRun('สั่งสอน และตักเตือนอยู่เสมอ ข้าพเจ้าทราบรายละเอียดทั้งหมดที่มีอยู่ในคู่มือนักเรียนของโรงเรียนจักรคำคณาทร')],
+                            children: [createRun('สั่งสอน และตักเตือนอยู่เสมอ ข้าพเจ้าทราบรายละเอียดทั้งหมดที่มีอยู่ในคู่มือนักเรียนของโรงเรียนสารคามพิทยาคม')],
                         }),
                         new Paragraph({
-                            children: [createRun('จังหวัดลำพูน แต่ข้าพเจ้ายังไม่ปฏิบัติตาม นับได้ว่าข้าพเจ้าได้เป็นผู้กระทำผิดระเบียบของโรงเรียน อันจะนำความเสื่อม')],
+                            children: [createRun('จังหวัดมหาสารคาม แต่ข้าพเจ้ายังไม่ปฏิบัติตาม นับได้ว่าข้าพเจ้าได้เป็นผู้กระทำผิดระเบียบของโรงเรียน อันจะนำความเสื่อม')],
                         }),
                         new Paragraph({
                             children: [createRun('เสียชื่อเสียงมาสู่โรงเรียนและหมู่คณะ ข้าพเจ้ายินดีให้ทางโรงเรียนพิจารณาโทษได้ทุกกรณี')],
@@ -1527,7 +1527,7 @@ async function exportDocx() {
                         }),
                         createParagraph([
                             createRun('ส่วนราชการ ', { bold: true }),
-                            createRun('กลุ่มบริหารกิจการนักเรียน  โรงเรียนจักรคำคณาทร  จังหวัดลำพูน'),
+                            createRun('กลุ่มบริหารกิจการนักเรียน  โรงเรียนสารคามพิทยาคม  จังหวัดมหาสารคาม'),
                         ]),
                         new Table({
                             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -1570,7 +1570,7 @@ async function exportDocx() {
                         }),
                         createParagraph([
                             createRun('เรียน ', { bold: true }),
-                            createRun('ผู้อำนวยการโรงเรียนจักรคำคณาทร  จังหวัดลำพูน'),
+                            createRun('ผู้อำนวยการโรงเรียนสารคามพิทยาคม  จังหวัดมหาสารคาม'),
                         ], { spacing: { after: 80 } }),
                         new Paragraph({
                             children: [
@@ -1692,7 +1692,7 @@ async function exportDocx() {
                         createParagraph('..........................................................................................................................................................................', { spacing: { after: 40 } }),
                         createParagraph('ลงชื่อ.................................................................', { alignment: AlignmentType.CENTER, spacing: { after: 20 } }),
                         createParagraph(getSignatureName(principalName), { alignment: AlignmentType.CENTER, spacing: { after: 20 } }),
-                        createParagraph('ผู้อำนวยการโรงเรียนจักรคำคณาทร  จังหวัดลำพูน', { alignment: AlignmentType.CENTER }),
+                        createParagraph('ผู้อำนวยการโรงเรียนสารคามพิทยาคม  จังหวัดมหาสารคาม', { alignment: AlignmentType.CENTER }),
                     ],
                 }],
             })
@@ -1728,7 +1728,7 @@ async function exportDocx() {
                         }),
                     },
                     children: [
-                        createParagraph('โรงเรียนจักรคำคณาทร   จังหวัดลำพูน', { alignment: AlignmentType.RIGHT, spacing: { after: 40 } }),
+                        createParagraph('โรงเรียนสารคามพิทยาคม   จังหวัดมหาสารคามรคาม', { alignment: AlignmentType.RIGHT, spacing: { after: 40 } }),
                         createParagraph(`วันที่ ${dateParts.day} เดือน ${dateParts.month} พ.ศ. ${dateParts.year}`, { alignment: AlignmentType.RIGHT, spacing: { after: 80 } }),
                         createParagraph([createRun('เรื่อง '), createRun('ขอเชิญผู้ปกครองพบเพื่อปรึกษาหารือ')], { spacing: { after: 60 } }),
                         createParagraph([createRun('เรียน '), createRun(`ผู้ปกครองของ ${studentName}`)], { spacing: { after: 220 } }),
@@ -1737,20 +1737,20 @@ async function exportDocx() {
                             createRun(studentName),
                             createRun(` นักเรียนชั้น ${classText}`),
                         ], { indent: { firstLine: 720 }, spacing: { after: 40 } }),
-                        createParagraph('โรงเรียนจักรคำคณาทร จังหวัดลำพูน ซึ่งเป็นนักเรียนในปกครองของท่าน ได้ประพฤติผิดระเบียบวินัยของโรงเรียนดังนี้'),
+                        createParagraph('โรงเรียนสารคามพิทยาคม จังหวัดมหาสารคาม ซึ่งเป็นนักเรียนในปกครองของท่าน ได้ประพฤติผิดระเบียบวินัยของโรงเรียนดังนี้'),
                         createParagraph(misconductSummary, { spacing: { after: 20 } }),
-                        createParagraph(`จึงขอเชิญท่านไปพบที่โรงเรียนจักรคำคณาทร ในวันที่ ${meetingParts.day || '..............'} เดือน ${meetingParts.month || '..........................'} พ.ศ. ${meetingParts.year || '..............'} เวลา ${meetingTimeText} น.`, { indent: { firstLine: 720 } }),
+                        createParagraph(`จึงขอเชิญท่านไปพบที่โรงเรียนสารคามพิทยาคม ในวันที่ ${meetingParts.day || '..............'} เดือน ${meetingParts.month || '..........................'} พ.ศ. ${meetingParts.year || '..............'} เวลา ${meetingTimeText} น.`, { indent: { firstLine: 720 } }),
                         createParagraph(`ที่กลุ่มบริหารกิจการนักเรียน เพื่อทราบรายละเอียดต่าง ๆ และร่วมมือกับทางโรงเรียนเพื่อหาวิธีปรับปรุงแก้ไขในทางที่ดี`),
                         createParagraph('หากท่านไม่ไปพบตามวันเวลาดังกล่าวทางโรงเรียนถือว่าท่านไม่ประสงค์ให้เด็กในความปกครองของท่านเรียนใน'),
-                        createParagraph('โรงเรียนจักรคำคณาทร จังหวัดลำพูน โรงเรียนจะพิจารณาดำเนินการต่อไป', { spacing: { after: 220 } }),
+                        createParagraph('โรงเรียนสารคามพิทยาคม จังหวัดมหาสารคาม โรงเรียนจะพิจารณาดำเนินการต่อไป', { spacing: { after: 220 } }),
                         createParagraph('จึงเรียนมาเพื่อทราบและหวังว่าจะได้รับความร่วมมือจากท่านเป็นอย่างดี', { alignment: AlignmentType.CENTER, spacing: { after: 120 } }),
                         createParagraph('ขอแสดงความนับถือ', { alignment: AlignmentType.CENTER, spacing: { after: 320 } }),
                         createParagraph('', { alignment: AlignmentType.CENTER, spacing: { after: 320 } }),
                         createParagraph(getSignatureName(principalName), { alignment: AlignmentType.CENTER, spacing: { after: 40 } }),
-                        createParagraph('ผู้อำนวยการโรงเรียนจักรคำคณาทร จังหวัดลำพูน', { alignment: AlignmentType.CENTER, spacing: { after: 120 } }),
+                        createParagraph('ผู้อำนวยการโรงเรียนสารคามพิทยาคม จังหวัดมหาสารคาม', { alignment: AlignmentType.CENTER, spacing: { after: 120 } }),
                         createParagraph('..........................................................................................................................................................................', { spacing: { after: 40 } }),
                         createParagraph('แบบตอบรับ', { alignment: AlignmentType.CENTER, bold: true, spacing: { after: 40 } }),
-                        createParagraph('เรียน    ผู้อำนวยการโรงเรียนจักรคำคณาทร    จังหวัดลำพูน'),
+                        createParagraph('เรียน    ผู้อำนวยการโรงเรียนสารคามพิทยาคม    จังหวัดมหาสารคาม'),
                         createParagraph('          ข้าพเจ้า........................................................ผู้ปกครองของ........................................................'),
                         createParagraph(`นักเรียนชั้น ม....../......   ( ) ยินดี   ( ) ขัดข้อง  มาตามวันที่นัดหมายคือวันที่........เดือน....................พ.ศ....................`),
                         createParagraph('หรือ  ขอเลื่อนเป็นวันที่........เดือน....................พ.ศ....................', { spacing: { after: 40 } }),
@@ -1798,8 +1798,8 @@ async function exportDocx() {
                     },
                     children: [
                         createParagraph('บันทึกการทำทัณฑ์บนกับนักเรียน', { alignment: AlignmentType.CENTER, bold: true, spacing: { after: 80 } }),
-                        createParagraph('โรงเรียนจักรคำคณาทร   จังหวัดลำพูน', { alignment: AlignmentType.RIGHT, spacing: { after: 40 } }),
-                        createParagraph('อำเภอเมือง   จังหวัดลำพูน', { alignment: AlignmentType.RIGHT, spacing: { after: 40 } }),
+                        createParagraph('โรงเรียนสารคามพิทยาคม   จังหวัดมหาสารคาม', { alignment: AlignmentType.RIGHT, spacing: { after: 40 } }),
+                        createParagraph('อำเภอเมือง   จังหวัดมหาสารคาม', { alignment: AlignmentType.RIGHT, spacing: { after: 40 } }),
                         createParagraph(`วันที่ ${dateParts.day} เดือน ${dateParts.month} พ.ศ. ${dateParts.year}`, { alignment: AlignmentType.RIGHT, spacing: { after: 80 } }),
 
                         createParagraph(`ข้าพเจ้า ${guardianNameText} เป็นผู้ปกครองของ ${studentName}`, { indent: { firstLine: 720 }, spacing: { after: 30 } }),
@@ -1811,7 +1811,7 @@ async function exportDocx() {
                         createParagraph(`ได้รับทราบความผิดของ ${studentName} ที่ได้กระทำไปแล้ว`, { spacing: { after: 60 } }),
 
                         createParagraph('เป็นการกระทำที่ไม่เหมาะสมกับสภาพความเป็นนักเรียนอย่างยิ่ง จึงยินยอมทำทัณฑ์บนไว้ให้แก่', { indent: { firstLine: 720 }, spacing: { after: 30 } }),
-                        createParagraph(`${studentName} นักเรียนโรงเรียนจักรคำคณาทร จังหวัดลำพูน ว่าข้าพเจ้า`, { spacing: { after: 30 } }),
+                        createParagraph(`${studentName} นักเรียนโรงเรียนสารคามพิทยาคม จังหวัดมหาสารคาม ว่าข้าพเจ้า`, { spacing: { after: 30 } }),
                         createParagraph(`จะควบคุมดูแลและกวดขันให้${studentCareNameText} ซึ่งเป็นนักเรียนในความปกครองของข้าพเจ้า`, { spacing: { after: 30 } }),
                         createParagraph('ไม่ให้ประพฤติเช่นนี้อีกต่อไป อันจะนำความเสื่อมเสียมาสู่ตนเอง สถานศึกษา และจะเข้มงวดให้', { spacing: { after: 30 } }),
                         createParagraph(`${studentName} ปฏิบัติตามระเบียบวินัยของโรงเรียนโดยเคร่งครัด`, { spacing: { after: 30 } }),
@@ -1870,7 +1870,7 @@ async function exportDocx() {
                         createParagraph('..............................................................................................................................................................', { spacing: { after: 320 } }),
                         createParagraph('', { alignment: AlignmentType.CENTER, spacing: { after: 320 } }),
                         createParagraph(getSignatureName(principalName), { alignment: AlignmentType.CENTER, spacing: { after: 20 } }),
-                        createParagraph('ผู้อำนวยการโรงเรียนจักรคำคณาทร จังหวัดลำพูน', { alignment: AlignmentType.CENTER }),
+                        createParagraph('ผู้อำนวยการโรงเรียนสารคามพิทยาคม จังหวัดมหาสารคาม', { alignment: AlignmentType.CENTER }),
                     ],
                 }],
             })
