@@ -29,8 +29,11 @@ jobs:
           cat <<EOF > .env
           VITE_APP_BASE_URL=${{ secrets.VITE_APP_BASE_URL }}
           VITE_IMG_PROFILE_URL=${{ secrets.VITE_IMG_PROFILE_URL }}
+          VITE_ENABLE_LINEUP_COLUMN=${{ secrets.VITE_ENABLE_LINEUP_COLUMN }}
+          VITE_ENABLE_DEVICE_USECASE=${{ secrets.VITE_ENABLE_DEVICE_USECASE }}
+          VITE_CHECKNAME_PRESENT_MODE=${{ secrets.VITE_CHECKNAME_PRESENT_MODE }}
           EOF
-
+          
       - name: Build application
         run: npm run build
 
