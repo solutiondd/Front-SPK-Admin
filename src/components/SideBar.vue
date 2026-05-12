@@ -212,7 +212,7 @@
                         </div>
                     </div>
                     <ul v-show="isExpanded && isBehaviorMenuOpen" class="ml-4 mt-2 space-y-2">
-                        <li>
+                        <li v-if="auth.user?.role !== 'teacher'">
                             <router-link to="/home/behavior"
                                 class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-warning/20 transition-colors"
                                 :class="submenuClass('/home/behavior')">
@@ -238,7 +238,7 @@
                                 <span class="text-sm">จัดการคะแนน</span>
                             </router-link>
                         </li>
-                        <li>
+                        <li v-if="auth.user?.role !== 'teacher'">
                             <router-link to="/home/leave"
                                 class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-warning/20 transition-colors"
                                 :class="submenuClass('/home/leave')">
