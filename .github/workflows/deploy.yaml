@@ -1,0 +1,64 @@
+name: Deploy to Linux VM
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create production env file
+        shell: bash
+        run: |
+          cat <<EOF > .env
+          VITE_APP_BASE_URL=${{ secrets.VITE_APP_BASE_URL }}
+          VITE_IMG_PROFILE_URL=${{ secrets.VITE_IMG_PROFILE_URL }}
+          VITE_ENABLE_LINEUP_COLUMN=${{ secrets.VITE_ENABLE_LINEUP_COLUMN }}
+          VITE_ENABLE_DEVICE_USECASE=${{ secrets.VITE_ENABLE_DEVICE_USECASE }}
+          VITE_CHECKNAME_PRESENT_MODE=${{ secrets.VITE_CHECKNAME_PRESENT_MODE }}
+          EOF
+          
+      - name: Build application
+        run: npm run build
+
+      - name: Setup SSH key
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p "${{ secrets.VM_PORT }}" "${{ secrets.VM_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Ensure target directory exists
+        shell: bash
+        run: |
+          ssh -p "${{ secrets.VM_PORT }}" "${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}" \
+            "mkdir -p '${{ secrets.VM_TARGET_DIR }}'"
+
+      - name: Clean target directory
+        shell: bash
+        run: |
+          ssh -p "${{ secrets.VM_PORT }}" "${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}" \
+            "find '${{ secrets.VM_TARGET_DIR }}' -mindepth 1 -maxdepth 1 -exec rm -rf {} +"
+
+      - name: Upload build artifacts
+        shell: bash
+        run: |
+          scp -P "${{ secrets.VM_PORT }}" -r dist/* \
+            "${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:${{ secrets.VM_TARGET_DIR }}/"
