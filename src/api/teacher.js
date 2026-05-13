@@ -63,6 +63,7 @@ export class TeacherService {
       form.append("position", formData.position);
       form.append("department", formData.department);
       form.append("status", formData.status);
+      if (formData.rfid) form.append("rfid", formData.rfid);
 
       if (formData.picture) {
         form.append("picture", formData.picture);
