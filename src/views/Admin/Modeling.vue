@@ -215,7 +215,11 @@ const fetchData = async () => {
         const response = await ModelingService.getModelings(params);
 
         if (response.message === "Success") {
-            modelings.value = response.data;
+            const rows = Array.isArray(response.data) ? response.data : [];
+            modelings.value = rows.map((row) => ({
+                ...row,
+                rfid: row?.rfid ?? row?.user?.rfid ?? row?.profile?.rfid ?? ''
+            }));
             totalItems.value = response.total_items || response.data.length;
             totalPages.value = response.total_pages || 1;
         }
