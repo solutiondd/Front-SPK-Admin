@@ -91,6 +91,17 @@
                         </label>
                     </div>
 
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">เลขบัตร RFID <span class="text-gray-500">(ไม่บังคับ)</span></span>
+                        </label>
+                        <input v-model="formData.rfid" type="text" class="input input-bordered w-full"
+                            @input="validateRfid" :class="{ 'input-error': rfidError }" autocomplete="off" />
+                        <label v-if="rfidError" class="label">
+                            <span class="label-text-alt text-error">{{ rfidError }}</span>
+                        </label>
+                    </div>
+
                     <div class="form-control w-full md:col-span-2">
                         <label class="label">
                             <span class="label-text">ชั้นปี / ห้อง</span>
@@ -151,11 +162,13 @@ const previewImage = ref('')
 const fileError = ref('')
 const firstNameError = ref('')
 const lastNameError = ref('')
+const rfidError = ref('')
 const formData = ref({
     userid: '',
     pre_name: '',
     first_name: '',
     last_name: '',
+    rfid: '',
     grade: '',
     classroom: '',
     picture: null
@@ -230,10 +243,24 @@ const validateLastName = () => {
     }
 }
 
+const validateRfid = () => {
+    if (!formData.value.rfid) {
+        rfidError.value = ''
+        return
+    }
+
+    if (!/^\d+$/.test(formData.value.rfid)) {
+        rfidError.value = 'เลขบัตรต้องเป็นตัวเลขเท่านั้น'
+    } else {
+        rfidError.value = ''
+    }
+}
+
 const isFormValid = computed(() => {
     return (
         !firstNameError.value &&
         !lastNameError.value &&
+        !rfidError.value &&
         formData.value.userid &&
         formData.value.pre_name &&
         formData.value.first_name &&
@@ -251,6 +278,7 @@ const openModal = (fixed = null) => {
             pre_name: '',
             first_name: '',
             last_name: '',
+            rfid: '',
             grade: fixed.grade,
             classroom: fixed.classroom,
             picture: null
@@ -261,6 +289,7 @@ const openModal = (fixed = null) => {
             pre_name: '',
             first_name: '',
             last_name: '',
+            rfid: '',
             grade: '',
             classroom: '',
             picture: null
@@ -271,6 +300,7 @@ const openModal = (fixed = null) => {
     useridError.value = ''
     firstNameError.value = ''
     lastNameError.value = ''
+    rfidError.value = ''
     modalRef.value.showModal()
 }
 
@@ -281,6 +311,7 @@ const closeModal = () => {
         pre_name: '',
         first_name: '',
         last_name: '',
+        rfid: '',
         grade: '',
         classroom: '',
         picture: null
@@ -290,6 +321,7 @@ const closeModal = () => {
     useridError.value = ''
     firstNameError.value = ''
     lastNameError.value = ''
+    rfidError.value = ''
 }
 
 const handleGradeChange = () => {
@@ -384,6 +416,7 @@ const removeImage = () => {
 const handleSubmit = async () => {
     validateFirstName()
     validateLastName()
+    validateRfid()
 
     if (!isFormValid.value) {
         const { default: Swal } = await import('sweetalert2')
