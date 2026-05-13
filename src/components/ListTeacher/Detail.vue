@@ -17,6 +17,8 @@
                     <div class="font-bold text-lg">{{ teacher.name }}</div>
                     <div class="text-sm text-base-content/70">รหัส: {{ teacherCode }}</div>
                     <div class="text-sm">แผนก: {{ teacher.department }} | ตำแหน่ง: {{ teacher.position }}</div>
+                    <div v-if="teacher?.rfid !== undefined && teacher?.rfid !== null && String(teacher.rfid).trim() !== ''"
+                        class="text-sm text-base-content/70">rfid: {{ teacher.rfid }}</div>
                 </div>
             </div>
             <div class="mb-2 font-semibold flex items-center gap-2">
@@ -334,7 +336,6 @@ const fetchAttendance = async () => {
         holidays.value = Array.isArray(holidaysRes.data) ? holidaysRes.data : []
 
         const yearsToFetch = [year]
-        // Term 2 can span into Jan-Mar of the next calendar year, so only then we also load previous year.
         if (month <= 2) {
             yearsToFetch.push(year - 1)
         }

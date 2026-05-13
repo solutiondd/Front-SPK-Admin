@@ -290,6 +290,7 @@ const fetchStudents = async () => {
                 grade: student.grade,
                 room: student.classroom,
                 score: Number.isFinite(Number(student.score)) ? Number(student.score) : 100,
+                rfid: student.rfid,
                 phone: student.phone || '-',
                 picture: student.picture ? imageBaseUrl + student.picture : '',
                 has_password: student.has_password

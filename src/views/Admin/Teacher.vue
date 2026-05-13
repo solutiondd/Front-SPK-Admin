@@ -220,6 +220,7 @@ const fetchTeachers = async () => {
                 name: teacher.name,
                 code: teacher.userid,
                 department: teacher.department || '-',
+                rfid: teacher.rfid,
                 position: teacher.position || '-',
                 email: teacher.userid + '@ckk.ac.th',
                 phone: teacher.phone || '-',
