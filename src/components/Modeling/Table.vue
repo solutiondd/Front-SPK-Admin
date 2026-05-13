@@ -244,6 +244,7 @@ const getPictureUrl = (pic) => {
 
 const handleEdit = (item) => {
     const pictureUrl = getPictureUrl(item.picture);
+    const rfidValue = item?.rfid ?? item?.user?.rfid ?? item?.profile?.rfid ?? '';
     if (item.role === 'student') {
         updateStudentRef.value?.openModal({
             id: item._id,
@@ -252,6 +253,7 @@ const handleEdit = (item) => {
             code: item.userid,
             grade: item.grade,
             room: item.classroom,
+            rfid: rfidValue,
             picture: pictureUrl
         });
     } else {
@@ -261,6 +263,7 @@ const handleEdit = (item) => {
             userid: item.userid,
             position: item.position,
             department: item.department,
+            rfid: rfidValue,
             picture: pictureUrl
         });
     }
