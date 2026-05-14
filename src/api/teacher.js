@@ -27,19 +27,19 @@ export class TeacherService {
           filtered = filtered.filter(
             (teacher) =>
               teacher.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              teacher.userid?.toLowerCase().includes(searchQuery.toLowerCase())
+              teacher.userid?.toLowerCase().includes(searchQuery.toLowerCase()),
           );
         }
 
         if (department) {
           filtered = filtered.filter(
-            (teacher) => teacher.department === department
+            (teacher) => teacher.department === department,
           );
         }
 
         if (position) {
           filtered = filtered.filter(
-            (teacher) => teacher.position === position
+            (teacher) => teacher.position === position,
           );
         }
 

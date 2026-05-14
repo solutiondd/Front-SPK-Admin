@@ -104,7 +104,7 @@
                         <input v-model="formData.rfid" type="text" class="input input-bordered" @input="validateRfid"
                             autocomplete="off" />
                         <label v-if="rfidError" class="label"><span class="label-text-alt text-error">{{ rfidError
-                                }}</span></label>
+                        }}</span></label>
                     </div>
 
                     <div class="form-control">

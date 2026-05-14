@@ -67,13 +67,13 @@
                 <div class="flex items-center gap-1"><span
                         class="inline-block w-4 h-4 rounded-full bg-yellow-400"></span> มาสาย</div>
                 <div class="flex items-center gap-1"><span
-                    class="inline-block w-4 h-4 rounded-full bg-emerald-400"></span> ลา</div>
+                        class="inline-block w-4 h-4 rounded-full bg-emerald-400"></span> ลา</div>
                 <div class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded-full bg-red-500"></span>
                     ไม่ได้สแกน</div>
                 <div class="flex items-center gap-1"><span class="inline-block w-4 h-4 rounded-full bg-gray-400"></span>
                     วันหยุด</div>
                 <div class="flex items-center gap-1"><span
-                    class="inline-block w-4 h-4 rounded-full bg-violet-300"></span>
+                        class="inline-block w-4 h-4 rounded-full bg-violet-300"></span>
                     ปิดเทอม/ช่วงพิเศษ</div>
             </div>
             <AttendanceInfo ref="attendanceInfoRef" :user="teacher" :attendance="selectedAttendanceInfo"

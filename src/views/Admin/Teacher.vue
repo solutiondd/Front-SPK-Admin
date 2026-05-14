@@ -219,6 +219,7 @@ const fetchTeachers = async () => {
                 userid: teacher.userid,
                 name: teacher.name,
                 code: teacher.userid,
+                rfid: teacher.rfid,
                 department: teacher.department || '-',
                 rfid: teacher.rfid,
                 position: teacher.position || '-',

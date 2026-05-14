@@ -307,6 +307,13 @@ async function handleImport() {
             return val;
         }
 
+        function cleanGuardianPhone(val) {
+            if (val === undefined || val === null) return '';
+            const text = String(val).trim();
+            if (!text || text === '-') return '';
+            return text;
+        }
+
         const importedStudents = [];
         const failedStudents = [];
         for (const student of previewData.value) {
@@ -320,7 +327,7 @@ async function handleImport() {
             const cleanedStudent = {
                 ...student,
                 last_name: cleanLastName(student.last_name),
-                guardian_phone: (student.guardian_phone || '').toString().trim()
+                guardian_phone: cleanGuardianPhone(student.guardian_phone)
             };
 
             const imageNameKey = (cleanedStudent.imageName || '')

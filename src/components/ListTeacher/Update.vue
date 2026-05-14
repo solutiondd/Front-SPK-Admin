@@ -217,7 +217,7 @@ const openModal = async (teacher) => {
         position: teacher.position,
         department: teacher.department,
         status: 'ปกติ',
-        picture: null,
+        picture: null, 
         rfid: teacher.rfid !== undefined && teacher.rfid !== null ? String(teacher.rfid) : ''
     }
     useridError.value = ''
