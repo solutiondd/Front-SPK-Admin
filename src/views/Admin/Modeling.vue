@@ -218,7 +218,8 @@ const fetchData = async () => {
             const rows = Array.isArray(response.data) ? response.data : [];
             modelings.value = rows.map((row) => ({
                 ...row,
-                rfid: row?.rfid ?? row?.user?.rfid ?? row?.profile?.rfid ?? ''
+                rfid: row?.rfid,
+                guardian_phone: row?.guardian_phone
             }));
             totalItems.value = response.total_items || response.data.length;
             totalPages.value = response.total_pages || 1;

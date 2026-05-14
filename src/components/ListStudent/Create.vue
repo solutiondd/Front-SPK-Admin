@@ -102,6 +102,19 @@
                         </label>
                     </div>
 
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">เบอร์โทรผู้ปกครอง <span
+                                    class="text-gray-500">(ไม่บังคับ)</span></span>
+                        </label>
+                        <input v-model="formData.guardian_phone" type="text" class="input input-bordered w-full"
+                            @input="validateGuardianPhone" :class="{ 'input-error': guardianPhoneError }"
+                            autocomplete="off" />
+                        <label v-if="guardianPhoneError" class="label">
+                            <span class="label-text-alt text-error">{{ guardianPhoneError }}</span>
+                        </label>
+                    </div>
+
                     <div class="form-control w-full md:col-span-2">
                         <label class="label">
                             <span class="label-text">ชั้นปี / ห้อง</span>
@@ -163,12 +176,14 @@ const fileError = ref('')
 const firstNameError = ref('')
 const lastNameError = ref('')
 const rfidError = ref('')
+const guardianPhoneError = ref('')
 const formData = ref({
     userid: '',
     pre_name: '',
     first_name: '',
     last_name: '',
     rfid: '',
+    guardian_phone: '',
     grade: '',
     classroom: '',
     picture: null
@@ -256,11 +271,25 @@ const validateRfid = () => {
     }
 }
 
+const validateGuardianPhone = () => {
+    if (!formData.value.guardian_phone) {
+        guardianPhoneError.value = ''
+        return
+    }
+
+    if (!/^\d+$/.test(formData.value.guardian_phone)) {
+        guardianPhoneError.value = 'เบอร์โทรผู้ปกครองต้องเป็นตัวเลขเท่านั้น'
+    } else {
+        guardianPhoneError.value = ''
+    }
+}
+
 const isFormValid = computed(() => {
     return (
         !firstNameError.value &&
         !lastNameError.value &&
         !rfidError.value &&
+        !guardianPhoneError.value &&
         formData.value.userid &&
         formData.value.pre_name &&
         formData.value.first_name &&
@@ -279,6 +308,7 @@ const openModal = (fixed = null) => {
             first_name: '',
             last_name: '',
             rfid: '',
+            guardian_phone: '',
             grade: fixed.grade,
             classroom: fixed.classroom,
             picture: null
@@ -290,6 +320,7 @@ const openModal = (fixed = null) => {
             first_name: '',
             last_name: '',
             rfid: '',
+            guardian_phone: '',
             grade: '',
             classroom: '',
             picture: null
@@ -301,6 +332,7 @@ const openModal = (fixed = null) => {
     firstNameError.value = ''
     lastNameError.value = ''
     rfidError.value = ''
+    guardianPhoneError.value = ''
     modalRef.value.showModal()
 }
 
@@ -312,6 +344,7 @@ const closeModal = () => {
         first_name: '',
         last_name: '',
         rfid: '',
+        guardian_phone: '',
         grade: '',
         classroom: '',
         picture: null
@@ -322,6 +355,7 @@ const closeModal = () => {
     firstNameError.value = ''
     lastNameError.value = ''
     rfidError.value = ''
+    guardianPhoneError.value = ''
 }
 
 const handleGradeChange = () => {
@@ -417,6 +451,7 @@ const handleSubmit = async () => {
     validateFirstName()
     validateLastName()
     validateRfid()
+    validateGuardianPhone()
 
     if (!isFormValid.value) {
         const { default: Swal } = await import('sweetalert2')
