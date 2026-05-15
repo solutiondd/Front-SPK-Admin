@@ -28,10 +28,11 @@
                     <input type="file" accept="image/*" multiple @change="onImagesChange"
                         class="file-input file-input-bordered file-input-sm w-full max-w-xs" />
                     <p v-if="imageFiles.length" class="text-xs text-success mt-1">รูปภาพที่เลือก: {{ imageFiles.length
-                        }} ไฟล์</p>
+                    }} ไฟล์</p>
                     <p class="text-xs text-gray-500 mt-1">กรุณาตั้งชื่อไฟล์รูปภาพให้ตรงกับคอลัมน์ ชื่อรูป เช่น
                         <b>image001.jpg</b>
-                        เพื่อให้ระบบแมปข้อมูลอัตโนมัติ</p>
+                        เพื่อให้ระบบแมปข้อมูลอัตโนมัติ
+                    </p>
                 </div>
             </div>
 
@@ -52,6 +53,7 @@
                                 <th>คำนำหน้า</th>
                                 <th>ชื่อ</th>
                                 <th>นามสกุล</th>
+                                <th>รหัสบัตร</th>
                                 <th>ตำแหน่ง</th>
                                 <th>แผนก</th>
                                 <th>ชื่อรูปภาพ</th>
@@ -63,6 +65,7 @@
                                 <td>{{ teacher.pre_name }}</td>
                                 <td>{{ teacher.first_name }}</td>
                                 <td>{{ teacher.last_name }}</td>
+                                <td>{{ teacher.rfid || '-' }}</td>
                                 <td>{{ teacher.position }}</td>
                                 <td>{{ teacher.department }}</td>
                                 <td>
@@ -251,6 +254,7 @@ function previewExcel() {
                         pre_name: mapHeader('คำนำหน้า', row) || mapHeader('pre_name', row) || '',
                         first_name: mapHeader('ชื่อ', row) || mapHeader('first_name', row) || '',
                         last_name: mapHeader('นามสกุล', row) || mapHeader('last_name', row) || '',
+                        rfid: (mapHeader('รหัสบัตร (rfid)', row) || mapHeader('rfid', row) || '').toString().trim(),
                         position: mapHeader('ตำแหน่ง', row) || mapHeader('position', row) || '',
                         department: mapHeader('แผนก', row) || mapHeader('department', row) || '',
                         status: 'ปกติ',
@@ -305,12 +309,20 @@ async function handleImport() {
             return val;
         }
 
+        function cleanRfid(val) {
+            if (val === undefined || val === null) return '';
+            const text = String(val).trim();
+            if (!text || text === '-') return '';
+            return text;
+        }
+
         const importedTeachers = [];
         const failedTeachers = [];
         for (const teacher of previewData.value) {
             const cleanedTeacher = {
                 ...teacher,
-                last_name: cleanLastName(teacher.last_name)
+                last_name: cleanLastName(teacher.last_name),
+                rfid: cleanRfid(teacher.rfid)
             };
 
             const imageNameKey = (cleanedTeacher.imageName || '')
@@ -327,6 +339,7 @@ async function handleImport() {
                 last_name: cleanedTeacher.last_name,
                 position: cleanedTeacher.position,
                 department: cleanedTeacher.department,
+                rfid: cleanedTeacher.rfid,
                 status: 'ปกติ',
                 picture: resolvedImageFile || null
             };
