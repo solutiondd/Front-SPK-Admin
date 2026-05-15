@@ -31,7 +31,8 @@
                         }} ไฟล์</p>
                     <p class="text-xs text-gray-500 mt-1">กรุณาตั้งชื่อไฟล์รูปภาพให้ตรงกับคอลัมน์ ชื่อรูป เช่น
                         <b>image001.jpg</b>
-                        เพื่อให้ระบบแมปข้อมูลอัตโนมัติ</p>
+                        เพื่อให้ระบบแมปข้อมูลอัตโนมัติ
+                    </p>
                 </div>
             </div>
 
@@ -52,6 +53,7 @@
                                 <th>คำนำหน้า</th>
                                 <th>ชื่อ</th>
                                 <th>นามสกุล</th>
+                                <th>รหัสบัตร</th>
                                 <th>ชั้นปี</th>
                                 <th>ห้อง</th>
                                 <th>เบอร์โทรผู้ปกครอง</th>
@@ -64,6 +66,7 @@
                                 <td>{{ student.pre_name }}</td>
                                 <td>{{ student.first_name }}</td>
                                 <td>{{ student.last_name }}</td>
+                                <td>{{ student.rfid || '-' }}</td>
                                 <td>{{ student.grade }}</td>
                                 <td>{{ student.classroom }}</td>
                                 <td>{{ student.guardian_phone || '-' }}</td>
@@ -253,6 +256,7 @@ function previewExcel() {
                         pre_name: mapHeader('คำนำหน้า', row) || mapHeader('pre_name', row) || '',
                         first_name: mapHeader('ชื่อ', row) || mapHeader('first_name', row) || '',
                         last_name: mapHeader('นามสกุล', row) || mapHeader('last_name', row) || '',
+                        rfid: (mapHeader('รหัสบัตร (rfid)', row) || mapHeader('rfid', row) || '').toString().trim(),
                         grade: mapHeader('ชั้นปี', row) || mapHeader('grade', row) || '',
                         classroom: mapHeader('ห้อง', row) || mapHeader('classroom', row) || '',
                         guardian_phone: (mapHeader('เบอร์โทรผู้ปกครอง', row) || mapHeader('guardian_phone', row) || mapHeader('parent_phone', row) || '').toString().trim(),
@@ -314,6 +318,13 @@ async function handleImport() {
             return text;
         }
 
+        function cleanRfid(val) {
+            if (val === undefined || val === null) return '';
+            const text = String(val).trim();
+            if (!text || text === '-') return '';
+            return text;
+        }
+
         const importedStudents = [];
         const failedStudents = [];
         for (const student of previewData.value) {
@@ -327,7 +338,8 @@ async function handleImport() {
             const cleanedStudent = {
                 ...student,
                 last_name: cleanLastName(student.last_name),
-                guardian_phone: cleanGuardianPhone(student.guardian_phone)
+                guardian_phone: cleanGuardianPhone(student.guardian_phone),
+                rfid: cleanRfid(student.rfid)
             };
 
             const imageNameKey = (cleanedStudent.imageName || '')
@@ -350,6 +362,7 @@ async function handleImport() {
                 if (cleanedStudent.grade) formData.grade = cleanedStudent.grade;
                 if (cleanedStudent.classroom) formData.classroom = cleanedStudent.classroom;
                 if (cleanedStudent.guardian_phone) formData.guardian_phone = cleanedStudent.guardian_phone;
+                formData.rfid = cleanedStudent.rfid;
                 if (resolvedImageFile) formData.picture = resolvedImageFile;
                 try {
                     const response = await studentService.updateStudent(oldData._id, formData);
@@ -379,6 +392,7 @@ async function handleImport() {
                     grade: cleanedStudent.grade,
                     classroom: cleanedStudent.classroom,
                     guardian_phone: cleanedStudent.guardian_phone,
+                    rfid: cleanedStudent.rfid,
                     picture: resolvedImageFile || null
                 };
                 try {

@@ -345,6 +345,22 @@ import featureFlags from '../../config/featureFlags.js'
 import { ref, computed } from 'vue'
 
 const loadingExport = ref(false)
+
+function normalizeCellValue(value) {
+    if (value === null || value === undefined || value === '') return '-'
+    if (typeof value === 'object') return JSON.stringify(value)
+    return value
+}
+
+function formatClassOrDepartment(item) {
+    if (item?.department !== null && item?.department !== undefined && item?.department !== '') {
+        return normalizeCellValue(item.department)
+    }
+    const grade = normalizeCellValue(item?.grade)
+    const classroom = normalizeCellValue(item?.classroom)
+    return `${grade}/${classroom}`
+}
+
 async function exportAllToExcel() {
     if (loadingExport.value) return
     loadingExport.value = true
@@ -417,10 +433,10 @@ async function exportAllToExcel() {
             if (item.attendances && item.attendances.length > 0) {
                 item.attendances.forEach(att => {
                     const row = {
-                        'รหัส': item.userid,
-                        'ชื่อ-สกุล': item.name,
-                        'ตำแหน่ง': item.position,
-                        'ชั้นเรียน/แผนก': item.department ? item.department : `${item.grade}/${item.classroom}`,
+                        'รหัส': normalizeCellValue(item.userid),
+                        'ชื่อ-สกุล': normalizeCellValue(item.name),
+                        'ตำแหน่ง': normalizeCellValue(item.position),
+                        'ชั้นเรียน/แผนก': formatClassOrDepartment(item),
                         'วันที่': formatDateTH(att.date),
                         'เวลาเข้า': getFirstTimeByUsecase(att, 'attendance') !== '-' ? getFirstTimeByUsecase(att, 'attendance') : getLegacyEntryTime(att),
                         'เวลาออก': getFirstTimeByUsecase(att, 'attendance') !== '-' ? getLegacyExitTime({
@@ -436,10 +452,10 @@ async function exportAllToExcel() {
                 })
             } else {
                 const row = {
-                    'รหัส': item.userid,
-                    'ชื่อ-สกุล': item.name,
-                    'ตำแหน่ง': item.position,
-                    'ชั้นเรียน/แผนก': item.department ? item.department : `${item.grade}/${item.classroom}`,
+                    'รหัส': normalizeCellValue(item.userid),
+                    'ชื่อ-สกุล': normalizeCellValue(item.name),
+                    'ตำแหน่ง': normalizeCellValue(item.position),
+                    'ชั้นเรียน/แผนก': formatClassOrDepartment(item),
                     'วันที่': '-',
                     'เวลาเข้า': '-',
                     'เวลาออก': '-',
@@ -462,7 +478,7 @@ async function exportAllToExcel() {
         worksheet.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' }
         worksheet.getCell('A1').font = { bold: true }
 
-        const header = ['รหัส', 'ชื่อ-สกุล', 'ตำแหน่ง', 'ชั้นเรียน/แผนก', 'วันที่', 'เข้า']
+        const header = ['รหัส', 'ชื่อ-สกุล', 'ตำแหน่ง', 'ชั้นเรียน/แผนก', 'วันที่', 'เวลาเข้า']
         if (featureFlags.attendance.enableLineupColumn) {
             header.push('เข้าแถว')
         }
@@ -473,18 +489,12 @@ async function exportAllToExcel() {
             worksheet.addRow(header.map(h => row[h]))
         })
 
-        worksheet.columns = [
-            { width: 10 },
-            { width: 40 },
-            { width: 40 },
-            { width: 40 },
-            { width: 15 },
-            { width: 15 },
-        ]
+        const columnWidths = [10, 40, 40, 40, 15, 15]
         if (featureFlags.attendance.enableLineupColumn) {
-            worksheet.columns.splice(5, 0, { width: 15 })
+            columnWidths.push(15)
         }
-        worksheet.columns.push({ width: 15 }, { width: 10 })
+        columnWidths.push(15, 10)
+        worksheet.columns = columnWidths.map(width => ({ width }))
         worksheet.getRow(2).alignment = { horizontal: 'center', vertical: 'middle' }
         worksheet.getColumn(1).alignment = { horizontal: 'center', vertical: 'middle' }
         worksheet.getRow(2).font = { bold: true }
