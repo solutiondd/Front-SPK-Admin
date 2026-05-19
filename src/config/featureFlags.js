@@ -1,9 +1,8 @@
-// เก็บการตั้งค่าเปิด/ปิดฟีเจอร์สำหรับแต่ละโรงเรียน
-
 export default {
+
   // ฟีเจอร์สำหรับตารางเข้า-ออก
   attendance: {
-    enableLineupColumn: "true", // คอลัมแสดงข้อมูลเวลา เข้าแถว
+    enableLineupColumn: true, // true = แสดงคอลัมน์เข้าแถว, false = ซ่อน
   },
 
   // ฟีเจอร์สำหรับหน้าเช็คชื่อ
@@ -15,6 +14,7 @@ export default {
 
   // ฟีเจอร์สำหรับอุปกรณ์
   device: {
-    enableUseCase: "true", // Use Case สำหรับการจัดการอุปกรณ์
+    enableUseCase: true, // // true = แสดง Use Case, false = ซ่อน
   },
+
 };

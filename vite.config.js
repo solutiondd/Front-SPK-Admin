@@ -8,8 +8,8 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       manifest: {
-        name: "CKK School Admin",
-        short_name: "CKKAdmin",
+        name: "SPK School Admin",
+        short_name: "SPKAdmin",
         start_url: ".",
         display: "standalone",
         background_color: "#ffffff",
