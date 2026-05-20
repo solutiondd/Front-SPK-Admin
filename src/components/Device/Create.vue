@@ -44,13 +44,24 @@
                     </select>
                 </div>
 
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text">Device Key</span>
-                        <span class="label-text-alt text-base-content/60">(ไม่บังคับ)</span>
-                    </label>
-                    <input v-model="formData.device_key" type="text" placeholder="กรอก Device Key (ถ้ามี)"
-                        class="input input-bordered w-full" />
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Username อุปกรณ์</span>
+                            <span class="label-text-alt text-base-content/60">(ไม่บังคับ)</span>
+                        </label>
+                        <input v-model="formData.device_username" type="text" placeholder="กรอก Username"
+                            class="input input-bordered w-full" />
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Password อุปกรณ์</span>
+                            <span class="label-text-alt text-base-content/60">(ไม่บังคับ)</span>
+                        </label>
+                        <input v-model="formData.device_password" type="password" placeholder="กรอก Password"
+                            class="input input-bordered w-full" />
+                    </div>
                 </div>
 
                 <div v-if="featureFlags.device.enableUseCase" class="form-control">
@@ -123,12 +134,25 @@ const formData = ref({
     location: '',
     gate_type: '',
     device_type: '',
-    device_key: '',
+    device_username: '',
+    device_password: '',
     usecase: '',
     attendance_start_time: '',
     attendance_end_time: '',
     use_attendance_time: false
 })
+
+const encodeDeviceKey = (username, password) => {
+    if (!username && !password) return ''
+
+    const credential = `${username}:${password}`
+    const bytes = new TextEncoder().encode(credential)
+    let binary = ''
+    bytes.forEach((byte) => {
+        binary += String.fromCharCode(byte)
+    })
+    return btoa(binary)
+}
 
 const openModal = () => {
     if (createModal.value) {
@@ -149,7 +173,8 @@ const resetForm = () => {
         location: '',
         gate_type: '',
         device_type: '',
-        device_key: '',
+        device_username: '',
+        device_password: '',
         usecase: '',
         attendance_start_time: '',
         attendance_end_time: '',
@@ -158,7 +183,11 @@ const resetForm = () => {
 }
 
 const handleSubmit = () => {
-    emit('success', { ...formData.value })
+    const { device_username, device_password, ...payload } = formData.value
+    emit('success', {
+        ...payload,
+        device_key: encodeDeviceKey(device_username, device_password)
+    })
 }
 
 defineExpose({
