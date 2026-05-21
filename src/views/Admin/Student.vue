@@ -177,6 +177,43 @@ const searchUserid = ref("");
 const detailModalVisible = ref(false)
 const detailStudent = ref(null)
 
+const normalizeImagePath = (path) => {
+    if (!path) return ''
+    if (/^https?:\/\//i.test(path)) return path
+    return imageBaseUrl + path
+}
+
+const normalizeGuardian = (guardianSource) => {
+    if (!guardianSource) return null
+    if (Array.isArray(guardianSource)) {
+        return guardianSource.map(guardian => ({
+            ...guardian,
+            picture: normalizeImagePath(guardian?.picture)
+        }))
+    }
+    return {
+        ...guardianSource,
+        picture: normalizeImagePath(guardianSource?.picture)
+    }
+}
+
+const mapStudentRow = (student) => ({
+    id: student._id,
+    userid: student.userid,
+    name: student.name,
+    code: student.userid,
+    grade: student.grade,
+    room: student.classroom,
+    rfid: student.rfid,
+    guardian_phone: student.guardian_phone || student.parent_phone || '',
+    guadians: normalizeGuardian(student.guadians),
+    guardians: normalizeGuardian(student.guardians),
+    score: Number.isFinite(Number(student.score)) ? Number(student.score) : 100,
+    phone: student.phone || '-',
+    picture: normalizeImagePath(student.picture),
+    has_password: student.has_password
+})
+
 const openDetailModal = (student) => {
     detailStudent.value = student
     detailModalVisible.value = true
@@ -282,21 +319,7 @@ const fetchStudents = async () => {
     try {
         const response = await studentService.getStudents(selectedGrade.value, selectedClassroom.value)
         if (response.message === 'Success' && response.data) {
-            students.value = response.data.map(student => ({
-                id: student._id,
-                userid: student.userid,
-                name: student.name,
-                code: student.userid,
-                grade: student.grade,
-                room: student.classroom,
-                rfid: student.rfid,
-                guardian_phone: student.guardian_phone || student.parent_phone || '',
-                score: Number.isFinite(Number(student.score)) ? Number(student.score) : 100,
-                rfid: student.rfid,
-                phone: student.phone || '-',
-                picture: student.picture ? imageBaseUrl + student.picture : '',
-                has_password: student.has_password
-            }))
+            students.value = response.data.map(mapStudentRow)
             if (response.data.length > 0) {
                 lastFetchedGrade.value = response.data[0].grade
                 lastFetchedClassroom.value = response.data[0].classroom
@@ -405,20 +428,7 @@ const searchByUserid = async () => {
         }
         const response = await studentService.getStudents(selectedGrade.value, selectedClassroom.value, userid, name);
         if (response.message === 'Success' && response.data) {
-            students.value = response.data.map(student => ({
-                id: student._id,
-                userid: student.userid,
-                name: student.name,
-                code: student.userid,
-                grade: student.grade,
-                room: student.classroom,
-                rfid: student.rfid,
-                guardian_phone: student.guardian_phone || student.parent_phone || '',
-                score: Number.isFinite(Number(student.score)) ? Number(student.score) : 100,
-                phone: student.phone || '-',
-                picture: student.picture ? imageBaseUrl + student.picture : '',
-                has_password: student.has_password
-            }));
+            students.value = response.data.map(mapStudentRow);
             currentPage.value = 1;
         } else {
             students.value = [];
