@@ -276,11 +276,6 @@ const resetForm = () => {
 
 const handleSubmit = () => {
     const { device_username, device_password, ...payload } = formData.value
-    const {
-        device_username: originalUsername,
-        device_password: originalPassword,
-        ...originalPayload
-    } = originalFormData.value
 
     if ((device_username && !device_password) || (!device_username && device_password)) {
         Swal.fire({
@@ -292,21 +287,12 @@ const handleSubmit = () => {
         return
     }
 
-    const changedPayload = {}
-    Object.keys(payload).forEach((key) => {
-        if (payload[key] !== originalPayload[key]) {
-            changedPayload[key] = payload[key]
-        }
-    })
-
-    const credentialChanged = device_username !== originalUsername || device_password !== originalPassword
     const encodedDeviceKey = encodeDeviceKey(device_username, device_password)
+    payload.device_key = encodedDeviceKey
 
-    if (credentialChanged) {
-        changedPayload.device_key = encodedDeviceKey
-    }
+    const hasChanges = Object.keys(payload).some((key) => payload[key] !== originalFormData.value[key])
 
-    if (Object.keys(changedPayload).length === 0) {
+    if (!hasChanges) {
         Swal.fire({
             icon: 'info',
             title: 'ไม่มีการเปลี่ยนแปลง',
@@ -319,7 +305,7 @@ const handleSubmit = () => {
 
     emit('success', {
         id: currentDevice.value._id,
-        ...changedPayload
+        ...payload
     })
 }
 
