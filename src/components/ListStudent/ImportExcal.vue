@@ -356,6 +356,7 @@ async function handleImport() {
                     ...oldData,
                     userid: cleanedStudent.userid,
                 };
+                delete formData.picture;
                 if (cleanedStudent.pre_name) formData.pre_name = cleanedStudent.pre_name;
                 if (cleanedStudent.first_name) formData.first_name = cleanedStudent.first_name;
                 if (cleanedStudent.last_name) formData.last_name = cleanedStudent.last_name;
