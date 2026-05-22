@@ -81,6 +81,7 @@
             </div>
 
             <div class="flex justify-end gap-2 mt-3">
+                <ModelingExport :filters="filters" />
                 <button @click="resetFilters" class="btn btn-ghost btn-xs">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -148,6 +149,7 @@ import { ClassRoomService } from '../../api/class-room.js';
 import { DepartmentService } from '../../api/department.js';
 import ModelingTable from "../../components/Modeling/Table.vue";
 import CreateModeling from "../../components/Modeling/Create.vue";
+import ModelingExport from "../../components/Modeling/Export.vue";
 import ModelingService from "../../api/modeling.js";
 import Swal from "sweetalert2";
 import { useAuthStore } from "../../stores/auth.js";
