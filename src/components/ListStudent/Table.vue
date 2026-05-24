@@ -62,7 +62,7 @@
                                             LINE
                                         </span>
                                         <div
-                                            class="pointer-events-none invisible absolute left-1/2 bottom-full z-50 mb-2 w-64 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-xl border border-base-300 bg-base-100 p-3 opacity-0 shadow-xl transition-all duration-150 group-hover:visible group-hover:opacity-100 md:left-auto md:right-0 md:translate-x-0">
+                                            class="pointer-events-none invisible absolute right-0 bottom-full z-50 mb-2 w-64 max-w-[calc(100vw-2rem)] translate-x-0 rounded-xl border border-base-300 bg-base-100 p-3 opacity-0 shadow-xl transition-all duration-150 group-hover:visible group-hover:opacity-100 md:left-auto md:right-0 md:translate-x-0">
                                             <div class="flex items-center gap-3">
                                                 <div class="avatar">
                                                     <div class="w-12 h-12 rounded-full bg-base-200 overflow-hidden">
@@ -129,7 +129,7 @@
                             <th class="bg-primary text-primary-content hidden sm:table-cell">รหัสนักเรียน</th>
                             <th class="bg-primary text-primary-content">ระดับชั้น</th>
                             <th class="bg-primary text-primary-content hidden md:table-cell">ห้อง</th>
-                            <th class="bg-primary text-primary-content text-center">คะแนน</th>
+                            <th class="bg-primary text-primary-content text-center hidden xl:table-cell">คะแนน</th>
                             <th class="bg-primary text-primary-content text-center">สถานะ</th>
                             <th class="bg-primary text-primary-content text-center">
                                 จัดการ</th>
@@ -175,7 +175,7 @@
                                 <span class="badge badge-primary badge-sm">{{ student.grade }}</span>
                             </td>
                             <td class="hidden md:table-cell">{{ student.room }}</td>
-                            <td class="text-center">
+                            <td class="text-center hidden xl:table-cell">
                                 <span class="badge badge-sm font-semibold" :class="getScoreBadgeClass(student.score)">
                                     {{ getScoreDisplay(student.score) }}
                                 </span>
@@ -230,8 +230,8 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="flex gap-2 justify-center">
-                                    <button class="btn btn-sm btn-info btn-outline" @click="emitDetail(student)"
+                                <div class="flex gap-1 lg:gap-2 justify-center">
+                                    <button class="btn btn-xs lg:btn-sm btn-info btn-outline" @click="emitDetail(student)"
                                         title="ดูรายละเอียด">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
@@ -242,7 +242,7 @@
                                         </svg>
                                     </button>
                                     <button v-if="auth.user?.role !== 'viewer' && auth.user?.role !== 'discipline'"
-                                        class="btn btn-sm btn-warning btn-outline" @click="emitEdit(student)"
+                                        class="btn btn-xs lg:btn-sm btn-warning btn-outline" @click="emitEdit(student)"
                                         title="แก้ไข">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
@@ -251,7 +251,7 @@
                                         </svg>
                                     </button>
                                     <button v-if="auth.user?.role !== 'viewer' && auth.user?.role !== 'discipline'"
-                                        class="btn btn-sm btn-error btn-outline" @click="emitDelete(student)"
+                                        class="btn btn-xs lg:btn-sm btn-error btn-outline" @click="emitDelete(student)"
                                         title="ลบ">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">

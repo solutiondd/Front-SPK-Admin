@@ -33,6 +33,12 @@ const statusTextMap = {
     notlinked: 'ไม่ได้เชื่อมต่อ',
 }
 
+const commonPrefixes = new Set([
+    'ด.ช.', 'ด.ญ.', 'ดช.', 'ดญ.', 'เด็กชาย', 'เด็กหญิง',
+    'นาย', 'นาง', 'นางสาว', 'Mr.', 'Mrs.', 'Ms.', 'Miss',
+    'Teacher', 'Dr.', 'Prof.', 'พระ', 'ว่าที่ร้อยตรี', 'ว่าที่ร.ต.',
+])
+
 function hasDevice(model) {
     return !!(model?.device && Object.keys(model.device).length > 0)
 }
@@ -47,13 +53,93 @@ function normalizeRowsStatus(rows, status) {
     return rows
 }
 
-function classOrDepartment(item) {
-    if (item?.role === 'student') {
-        const grade = item?.grade || '-'
-        const classroom = item?.classroom || '-'
-        return `${grade} / ${classroom}`
+function splitFullName(item) {
+    if (item?.pre_name || item?.first_name || item?.last_name) {
+        return {
+            prefix: item?.pre_name || '-',
+            firstName: item?.first_name || '-',
+            lastName: item?.last_name || '-',
+        }
     }
-    return item?.department || '-'
+
+    const normalizedName = String(item?.name || '').trim().replace(/\s+/g, ' ')
+    if (!normalizedName) {
+        return { prefix: '-', firstName: '-', lastName: '-' }
+    }
+
+    const parts = normalizedName.split(' ')
+    if (parts.length === 1) {
+        return { prefix: '-', firstName: parts[0], lastName: '-' }
+    }
+
+    const hasKnownPrefix = commonPrefixes.has(parts[0])
+    if (hasKnownPrefix) {
+        if (parts.length === 2) {
+            return { prefix: parts[0], firstName: parts[1], lastName: '-' }
+        }
+
+        return {
+            prefix: parts[0],
+            firstName: parts[1] || '-',
+            lastName: parts.slice(2).join(' ') || '-',
+        }
+    }
+
+    return {
+        prefix: '-',
+        firstName: parts[0] || '-',
+        lastName: parts.slice(1).join(' ') || '-',
+    }
+}
+
+function getExportConfig(role) {
+    if (role === 'teacher') {
+        return {
+            headers: ['รหัส', 'คำนำหน้า', 'ชื่อ', 'นามสกุล', 'ตำแหน่ง', 'แผนก'],
+            columns: [
+                { width: 18 },
+                { width: 14 },
+                { width: 20 },
+                { width: 24 },
+                { width: 22 },
+                { width: 24 },
+            ],
+            mapRow: item => {
+                const { prefix, firstName, lastName } = splitFullName(item)
+                return [
+                    item?.userid || '-',
+                    prefix,
+                    firstName,
+                    lastName,
+                    item?.position || '-',
+                    item?.department || '-',
+                ]
+            },
+        }
+    }
+
+    return {
+        headers: ['รหัส', 'คำนำหน้า', 'ชื่อ', 'นามสกุล', 'ชั้นปี', 'ห้อง'],
+        columns: [
+            { width: 18 },
+            { width: 14 },
+            { width: 20 },
+            { width: 24 },
+            { width: 14 },
+            { width: 14 },
+        ],
+        mapRow: item => {
+            const { prefix, firstName, lastName } = splitFullName(item)
+            return [
+                item?.userid || '-',
+                prefix,
+                firstName,
+                lastName,
+                item?.grade || '-',
+                item?.classroom || '-',
+            ]
+        },
+    }
 }
 
 async function fetchAllRows() {
@@ -101,40 +187,23 @@ async function exportToExcel() {
         const workbook = new ExcelJS.Workbook()
         const worksheet = workbook.addWorksheet('Modeling')
 
-        const selectedStatus = props.filters?.status || 'all'
-        worksheet.addRow(['การเชื่อมต่ออุปกรณ์'])
-        worksheet.mergeCells('A1:C1')
-        worksheet.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' }
-        worksheet.getCell('A1').font = { bold: true, size: 14 }
+        const selectedRole = props.filters?.role || 'student'
+        const exportConfig = getExportConfig(selectedRole)
 
-        worksheet.addRow([`สถานะ: ${statusTextMap[selectedStatus] || 'ทั้งหมด'}`])
-        worksheet.mergeCells('A2:C2')
-        worksheet.getCell('A2').alignment = { horizontal: 'left', vertical: 'middle' }
-        worksheet.getCell('A2').font = { bold: true }
-
-        const header = ['รหัส', 'ชื่อ-สกุล', 'ห้องเรียน/แผนก']
-        worksheet.addRow(header)
-        worksheet.getRow(3).font = { bold: true }
-        worksheet.getRow(3).alignment = { horizontal: 'center', vertical: 'middle' }
+        worksheet.addRow(exportConfig.headers)
+        worksheet.getRow(1).font = { bold: true }
+        worksheet.getRow(1).alignment = { horizontal: 'center', vertical: 'middle' }
 
         rows.forEach(item => {
-            worksheet.addRow([
-                item?.userid || '-',
-                item?.name || '-',
-                classOrDepartment(item),
-            ])
+            worksheet.addRow(exportConfig.mapRow(item))
         })
 
-        worksheet.columns = [
-            { width: 18 },
-            { width: 40 },
-            { width: 30 },
-        ]
+        worksheet.columns = exportConfig.columns
 
         worksheet.getColumn(1).alignment = { horizontal: 'center', vertical: 'middle' }
 
         const buffer = await workbook.xlsx.writeBuffer()
-        saveAs(new Blob([buffer], { type: 'application/octet-stream' }), `Modeling_${selectedStatus}.xlsx`)
+    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), `Modeling.xlsx`)
     } catch (error) {
         console.error('Error exporting modeling excel:', error)
         Swal.fire({
