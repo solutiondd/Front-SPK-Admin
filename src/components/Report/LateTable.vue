@@ -80,7 +80,7 @@
                                                     class="w-14 h-14 rounded object-cover cursor-pointer border border-base-200"
                                                     @click="viewImage(item.late_dates[0].timeStamps[0].imageUrl)"
                                                     @error="item.late_dates[0]._imgError = true" />
-                                                <p v-if="item.late_dates[0].timeStamps[0].similarity !== undefined"
+                                                <p v-if="hasSimilarity(item.late_dates[0].timeStamps[0].similarity)"
                                                     class="text-xs text-gray-500 text-center mt-1 w-full">
                                                     ความเหมือน: {{ item.late_dates[0].timeStamps[0].similarity }}%
                                                 </p>
@@ -128,7 +128,7 @@
                                                         class="w-14 h-14 rounded object-cover cursor-pointer border border-base-200"
                                                         @click="viewImage(late.timeStamps[0].imageUrl)"
                                                         @error="late._imgError = true" />
-                                                    <p v-if="late.timeStamps[0].similarity !== undefined"
+                                                    <p v-if="hasSimilarity(late.timeStamps[0].similarity)"
                                                         class="text-xs text-gray-500 text-center mt-1 w-full">
                                                         ความเหมือน: {{ late.timeStamps[0].similarity }}%
                                                     </p>
@@ -238,7 +238,7 @@
                                 <img :src="`${imgProBaseUrl}${late.timeStamps[0].imageUrl}`" alt="late snapshot"
                                     class="h-20 object-cover rounded-md cursor-pointer"
                                     @click="viewImage(late.timeStamps[0].imageUrl)" @error="late._imgError = true" />
-                                <p v-if="late.timeStamps[0].similarity !== undefined"
+                                <p v-if="hasSimilarity(late.timeStamps[0].similarity)"
                                     class="text-xs text-gray-500 text-center mt-1 w-full">
                                     ความเหมือน: {{ late.timeStamps[0].similarity }}%
                                 </p>
@@ -525,6 +525,12 @@ function getEntry(late) {
     const first = late.timeStamps[0];
     if (!first || !first.timeStamp) return '-';
     return first.timeStamp.split(' ')[1].substring(0, 5);
+}
+
+function hasSimilarity(value) {
+    if (value === undefined || value === null) return false;
+    if (typeof value === 'string' && value.trim() === '') return false;
+    return true;
 }
 
 function viewImage(image, isProfile = false) {
