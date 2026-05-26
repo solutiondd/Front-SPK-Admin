@@ -302,14 +302,36 @@ async function handleImport() {
     isImporting.value = true
     try {
         const imageMap = {};
+        const resizedImageCache = {};
         for (const file of imageFiles.value) {
             const baseName = file.name.split('.')[0];
             if (file.type.startsWith('image/')) {
-                try {
-                    const resizedBlob = await resizeImage(file, 70, 450);
-                    imageMap[baseName] = new File([resizedBlob], file.name, { type: 'image/jpeg' });
-                } catch (err) {
-                }
+                imageMap[baseName] = file;
+            }
+        }
+
+        async function getResizedImageByKey(key) {
+            const normalizedKey = (key || '')
+                .toString()
+                .trim()
+                .replace(/\.[^/.]+$/, '');
+
+            if (!normalizedKey) return null;
+
+            if (resizedImageCache[normalizedKey]) {
+                return resizedImageCache[normalizedKey];
+            }
+
+            const sourceFile = imageMap[normalizedKey];
+            if (!sourceFile) return null;
+
+            try {
+                const resizedBlob = await resizeImage(sourceFile, 70, 450);
+                const resizedFile = new File([resizedBlob], sourceFile.name, { type: 'image/jpeg' });
+                resizedImageCache[normalizedKey] = resizedFile;
+                return resizedFile;
+            } catch (err) {
+                return null;
             }
         }
 
@@ -341,7 +363,8 @@ async function handleImport() {
                 .trim()
                 .replace(/\.[^/.]+$/, '');
 
-            const resolvedImageFile = imageMap[imageNameKey] || imageMap[cleanedTeacher.userid];
+            const resolvedImageFile = await getResizedImageByKey(imageNameKey)
+                || await getResizedImageByKey(cleanedTeacher.userid);
 
             const formData = {
                 userid: cleanedTeacher.userid,
