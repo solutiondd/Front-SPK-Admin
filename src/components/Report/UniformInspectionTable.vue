@@ -20,7 +20,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="item in sortedRows" :key="item._id">
-                        <td>{{ item.grade || '-' }}</td>
+                        <td>{{ item.grade ? mapGradeDisplay(item.grade) : '-' }}</td>
                         <td>{{ item.classroom ?? '-' }}</td>
                         <td class="max-[582px]:hidden">{{ item.inspector?.name || '-' }}</td>
                         <td>{{ formatThaiDate(item.date) }}</td>
@@ -69,6 +69,7 @@
 import { computed, ref, watch } from 'vue';
 import { UniformInspectionService } from '../../api/uniform_inspection';
 import UniformInspectionDetail from './UniformInspectionDetail.vue';
+import { getGradeSortOrder, mapGradeDisplay } from '../../utils/gradeSystem';
 
 const props = defineProps({
     filters: {
@@ -100,13 +101,6 @@ const totalPages = computed(() => {
     return Math.max(1, Math.ceil(total / limit));
 });
 
-const getGradeNumber = (grade) => {
-    if (!grade) return Number.MAX_SAFE_INTEGER;
-    const match = String(grade).match(/\d+/);
-    if (!match) return Number.MAX_SAFE_INTEGER;
-    return Number(match[0]);
-};
-
 const getClassroomNumber = (classroom) => {
     const num = Number(classroom);
     return Number.isNaN(num) ? Number.MAX_SAFE_INTEGER : num;
@@ -114,7 +108,7 @@ const getClassroomNumber = (classroom) => {
 
 const sortedRows = computed(() => {
     return [...rows.value].sort((a, b) => {
-        const gradeDiff = getGradeNumber(a?.grade) - getGradeNumber(b?.grade);
+        const gradeDiff = getGradeSortOrder(a?.grade) - getGradeSortOrder(b?.grade);
         if (gradeDiff !== 0) return gradeDiff;
 
         const classroomDiff = getClassroomNumber(a?.classroom) - getClassroomNumber(b?.classroom);

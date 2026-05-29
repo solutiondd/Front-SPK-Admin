@@ -21,14 +21,14 @@
                     </svg>
                     เพิ่มนักเรียน
                 </button>
-                <button v-if="auth.user?.role !== 'teacher' && (selectedGrade === 'ม.3' || selectedGrade === 'ม.6')"
+                <button v-if="auth.user?.role !== 'teacher' && isTerminalSecondaryGrade(selectedGrade)"
                     class="btn btn-error btn-sm" @click="openDeleteAllModal">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
-                    ลบทั้งหมด {{ selectedGrade }}
+                    ลบทั้งหมด {{ mapGradeDisplay(selectedGrade) }}
                 </button>
             </div>
         </div>
@@ -44,7 +44,8 @@
                         <select v-model="selectedGrade" @change="handleGradeChange"
                             class="select select-bordered select-sm w-full sm:w-32"
                             :disabled="isQueryFilter || !!searchUserid">
-                            <option v-for="grade in availableGrades" :key="grade" :value="grade">{{ grade }}</option>
+                            <option v-for="grade in availableGrades" :key="grade" :value="grade">{{
+                                mapGradeDisplay(grade) }}</option>
                         </select>
                     </div>
 
@@ -143,6 +144,7 @@ import DetailModal from '../../components/ListStudent/Detail.vue'
 import { StudentService } from '../../api/student'
 import { ClassRoomService } from '../../api/class-room'
 import { useAuthStore } from '../../stores/auth'
+import { isTerminalSecondaryGrade, mapGradeDisplay, toVisibleSortedGrades } from '../../utils/gradeSystem'
 
 const isQueryFilter = ref(false)
 const auth = useAuthStore()
@@ -165,8 +167,8 @@ const handleImportSuccess = async (importedStudents) => {
 const updateModalRef = ref(null)
 const rePasswordModalRef = ref(null)
 const loading = ref(false)
-const selectedGrade = ref('ม.1')
-const selectedClassroom = ref('1')
+const selectedGrade = ref('')
+const selectedClassroom = ref('')
 const searchQuery = ref('')
 const currentPage = ref(1)
 const itemsPerPage = ref(5)
@@ -232,12 +234,7 @@ const closeDetailModal = () => {
 }
 
 const availableGrades = computed(() => {
-    const grades = [...new Set(classrooms.value.map(c => c.grade))]
-    return grades.sort((a, b) => {
-        const gradeA = parseInt(a.replace('ม.', ''))
-        const gradeB = parseInt(b.replace('ม.', ''))
-        return gradeA - gradeB
-    })
+    return toVisibleSortedGrades(classrooms.value.map(c => c.grade))
 })
 
 const availableClassrooms = computed(() => {

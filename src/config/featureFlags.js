@@ -1,4 +1,11 @@
 export default {
+  // ฟีเจอร์สำหรับระบบชั้นเรียน
+  gradeSystem: {
+    enableDisplayMapping: false, // true = แสดงชั้นเรียนแบบ NS/KG/YR ทั้งระบบ
+    enableLowerLevels: false, // true = แสดงระดับ เตรียมอนุบาล-ป.6
+    enablePromoteLevel: true, // true = แสดงปุ่มเลื่อนระดับห้องเรียน
+  },
+
   // ฟีเจอร์สำหรับตารางเข้า-ออก
   attendance: {
     enableLineupColumn: false, // true = แสดงคอลัมน์เข้าแถว, false = ซ่อน

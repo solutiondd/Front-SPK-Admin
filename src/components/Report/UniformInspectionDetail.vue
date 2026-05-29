@@ -19,8 +19,8 @@
                         <div class="space-y-2">
                             <div class="flex justify-between">
                                 <span class="text-base-content/70">ชั้น/ห้อง</span>
-                                <span class="font-semibold">{{ detail.grade || '-' }}/{{ detail.classroom ?? '-'
-                                }}</span>
+                                <span class="font-semibold">{{ formatGradeClassroomDisplay(detail.grade,
+                                    detail.classroom) }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-base-content/70">ผู้สร้าง</span>
@@ -92,7 +92,7 @@
                                         class="badge badge-error whitespace-nowrap max-[509px]:badge-xs">ไม่ผ่าน</span>
                                 </td>
                                 <td>{{ Array.isArray(item?.issues) && item.issues.length ? item.issues.join(', ') : '-'
-                                }}</td>
+                                    }}</td>
                                 <td>{{ item?.remark || '-' }}</td>
                             </tr>
                             <tr v-if="!(detail.students || []).length">
@@ -120,6 +120,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { UniformInspectionService } from '../../api/uniform_inspection';
+import { formatGradeClassroomDisplay } from '../../utils/gradeSystem';
 
 const modalRef = ref(null);
 const loading = ref(false);

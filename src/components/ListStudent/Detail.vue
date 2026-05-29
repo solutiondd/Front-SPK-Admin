@@ -18,7 +18,7 @@
                 <div>
                     <div class="font-bold text-lg">{{ student.name }}</div>
                     <div class="text-sm text-base-content/70">รหัส: {{ studentCode }}</div>
-                    <div class="text-sm">ระดับชั้น: {{ student.grade }} ห้อง {{ studentRoom }}</div>
+                    <div class="text-sm">ระดับชั้น: {{ mapGradeDisplay(student.grade) }} ห้อง {{ studentRoom }}</div>
                     <div v-if="studentGuardianPhone" class="text-sm text-base-content/70">
                         เบอร์ผู้ปกครอง: {{ studentGuardianPhone }}
                     </div>
@@ -109,6 +109,7 @@ import { AcademicCalendarService } from '../../api/academiccalendar'
 import { LeaveService } from '../../api/leave'
 import { ActivityService } from '../../api/activity'
 import AttendanceInfo from '../AttendanceInfo.vue'
+import { mapGradeDisplay } from '../../utils/gradeSystem'
 
 const emit = defineEmits(['close'])
 const props = defineProps({

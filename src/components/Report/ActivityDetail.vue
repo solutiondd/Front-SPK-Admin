@@ -43,7 +43,7 @@
                             <div class="flex justify-between">
                                 <span class="text-base-content/70">ชื่อกิจกรรม</span>
                                 <span class="font-semibold text-right break-words">{{ activity.activity_name || '-'
-                                    }}</span>
+                                }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-base-content/70">สถานที่</span>
@@ -55,12 +55,12 @@
                                     activity.activity_date_start || activity.activity_date || activity.date,
                                     activity.activity_date_end || activity.activity_date_start || activity.activity_date
                                     || activity.date
-                                    ) }}</span>
+                                ) }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-base-content/70">เวลา</span>
                                 <span class="font-semibold">{{ formatTimeRange(activity.start_time, activity.end_time)
-                                    }}</span>
+                                }}</span>
                             </div>
                         </div>
                     </div>
@@ -117,6 +117,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { formatGradeClassroomDisplay } from '../../utils/gradeSystem';
 
 const modalRef = ref(null);
 const activity = ref(null);
@@ -148,8 +149,7 @@ const getStatusBadgeClass = (status) => {
 
 const formatStudentLevel = (grade, classroom) => {
     if (!grade && !classroom) return null;
-    if (grade && classroom) return `${grade}/${classroom}`;
-    return grade || classroom;
+    return formatGradeClassroomDisplay(grade, classroom);
 };
 
 const formatTime = (time) => {

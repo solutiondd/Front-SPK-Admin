@@ -49,7 +49,8 @@
                     <select v-model="filters.grade" class="select select-sm select-bordered w-full"
                         :disabled="filters.role === 'teacher'">
                         <option value="">ทุกชั้นปี</option>
-                        <option v-for="grade in allGrades" :key="grade" :value="grade">{{ grade }}</option>
+                        <option v-for="grade in allGrades" :key="grade" :value="grade">{{ mapGradeDisplay(grade) }}
+                        </option>
                     </select>
                 </div>
 
@@ -80,7 +81,7 @@
                     <div
                         class="p-1 text-white bg-primary rounded-md text-center min-w-[120px] flex flex-col items-center">
                         <span class="label-text text-sm font-medium mb-1 text-secondary">ชั้นปี / ห้อง</span>
-                        <span>{{ teacherGrade }}/{{ teacherClassroom }}</span>
+                        <span>{{ mapGradeDisplay(teacherGrade) }}/{{ teacherClassroom }}</span>
                     </div>
                 </div>
 
@@ -95,6 +96,7 @@
 import { onMounted, ref, watch } from 'vue';
 import ActivityTable from '../../../components/Report/ActivityTable.vue';
 import { ClassRoomService } from '../../../api/class-room.js';
+import { mapGradeDisplay, toVisibleSortedGrades } from '../../../utils/gradeSystem';
 
 const today = new Date().toISOString().split('T')[0];
 const residentRole = localStorage.getItem('residentRole') || '';
@@ -144,7 +146,7 @@ onMounted(async () => {
             if (item?.classroom) roomsSet.add(String(item.classroom));
         });
 
-        allGrades.value = Array.from(gradesSet);
+        allGrades.value = toVisibleSortedGrades(Array.from(gradesSet));
         allRooms.value = Array.from(roomsSet);
     } catch (error) {
         console.error('Error fetching class rooms:', error);

@@ -28,7 +28,7 @@
                             </div>
                         </div>
                         <div class="flex flex-wrap gap-2 text-sm mt-2">
-                            <span class="badge badge-primary badge-sm">{{ student.grade }}</span>
+                            <span class="badge badge-primary badge-sm">{{ mapGradeDisplay(student.grade) }}</span>
                             <span class="badge badge-outline badge-sm">ห้อง {{ student.room }}</span>
                             <span class="badge badge-sm font-semibold" :class="getScoreBadgeClass(student.score)">
                                 คะแนน {{ getScoreDisplay(student.score) }}
@@ -52,7 +52,7 @@
                                             class="inline-block w-3 h-3 rounded-full"></span>
                                         <span class="text-xs">{{ student.has_password ? 'มีรหัสผ่าน' :
                                             'ยังไม่มีรหัสผ่าน'
-                                            }}</span>
+                                        }}</span>
                                     </template>
                                 </div>
                                 <span v-if="hasGuardian(student)" class="inline-flex items-center shrink-0">
@@ -175,7 +175,7 @@
                                             <div v-else
                                                 class="w-full h-full bg-secondary text-secondary-content flex items-center justify-center">
                                                 <span class="text-sm font-semibold">{{ getInitials(student.name)
-                                                    }}</span>
+                                                }}</span>
                                                 <svg class="ml-1 w-4 h-4 text-base-content/50" fill="none"
                                                     viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -190,7 +190,7 @@
                             </td>
                             <td class="hidden sm:table-cell">{{ student.code }}</td>
                             <td>
-                                <span class="badge badge-primary badge-sm">{{ student.grade }}</span>
+                                <span class="badge badge-primary badge-sm">{{ mapGradeDisplay(student.grade) }}</span>
                             </td>
                             <td class="hidden md:table-cell">{{ student.room }}</td>
                             <td class="text-center hidden xl:table-cell">
@@ -311,6 +311,7 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { StudentService } from '../../api/student'
+import { mapGradeDisplay } from '../../utils/gradeSystem'
 const auth = useAuthStore()
 const openGuardianKey = ref(null)
 const guardianDeletingKey = ref(null)

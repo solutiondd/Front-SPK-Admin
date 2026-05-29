@@ -24,7 +24,7 @@
                             @change="handleGradeChange">
                             <option value="">เลือกชั้นเรียน</option>
                             <option v-for="grade in gradeList" :key="grade" :value="grade">
-                                {{ grade }}
+                                {{ mapGradeDisplay(grade) }}
                             </option>
                         </select>
                     </div>
@@ -43,7 +43,7 @@
                     <div v-if="residentRole === 'teacher'" class="w-full col-span-1 lg:col-start-4 flex justify-end">
                         <div class="p-2 text-white bg-primary rounded-md text-center min-w-[120px]">
                             <span class="block text-sm font-medium text-secondary">ชั้นปี / ห้อง</span>
-                            <span>{{ teacherGrade }}/{{ teacherClassroom }}</span>
+                            <span>{{ mapGradeDisplay(teacherGrade) }}/{{ teacherClassroom }}</span>
                         </div>
                     </div>
                 </div>
@@ -64,6 +64,7 @@ import { StudentService } from '../../api/student';
 import { ClassRoomService } from '../../api/class-room';
 import { UniformInspectionService } from '../../api/uniform_inspection';
 import UniformInspectionTable from '../../components/Uniform Inspection/Table.vue';
+import { mapGradeDisplay, toVisibleSortedGrades } from '../../utils/gradeSystem';
 
 const studentService = new StudentService();
 const classRoomService = new ClassRoomService();
@@ -86,12 +87,7 @@ const isSaving = ref(false);
 let searchTimer = null;
 
 const gradeList = computed(() => {
-    const grades = new Set(classrooms.value.map(c => c.grade));
-    return Array.from(grades).sort((a, b) => {
-        const numA = parseInt(String(a).split('.')[1]);
-        const numB = parseInt(String(b).split('.')[1]);
-        return numA - numB;
-    });
+    return toVisibleSortedGrades(classrooms.value.map(c => c.grade));
 });
 
 const filteredClassrooms = computed(() => {

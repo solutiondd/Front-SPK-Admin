@@ -51,12 +51,12 @@
                             <div class="flex justify-between">
                                 <span class="text-base-content/70">ช่วงการลา</span>
                                 <span class="font-semibold">{{ formatDateRange(request.start_date, request.end_date)
-                                }}</span>
+                                    }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-base-content/70">เวลา</span>
                                 <span class="font-semibold">{{ formatTimeRange(request.start_time, request.end_time)
-                                }}</span>
+                                    }}</span>
                             </div>
                         </div>
                     </div>
@@ -109,6 +109,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { formatGradeClassroomDisplay } from '../../utils/gradeSystem';
 
 const modalRef = ref(null);
 const request = ref(null);
@@ -138,8 +139,7 @@ const getStatusBadgeClass = (status) => {
 
 const formatStudentLevel = (grade, classroom) => {
     if (!grade && !classroom) return null;
-    if (grade && classroom) return `${grade}/${classroom}`;
-    return grade || classroom;
+    return formatGradeClassroomDisplay(grade, classroom);
 };
 
 const formatTime = (time) => {

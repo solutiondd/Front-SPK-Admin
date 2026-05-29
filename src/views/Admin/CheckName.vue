@@ -31,7 +31,7 @@
                                 @change="handleGradeChange">
                                 <option value="">เลือกชั้นเรียน</option>
                                 <option v-for="grade in gradeList" :key="grade" :value="grade">
-                                    {{ grade }}
+                                    {{ mapGradeDisplay(grade) }}
                                 </option>
                             </select>
                         </div>
@@ -50,7 +50,7 @@
                             class="w-full col-span-1 lg:col-start-4 flex justify-end">
                             <div class="p-2 text-white bg-primary rounded-md text-center min-w-[120px]">
                                 <span class="block text-sm font-medium text-secondary">ชั้นปี / ห้อง</span>
-                                <span>{{ teacherGrade }}/{{ teacherClassroom }}</span>
+                                <span>{{ mapGradeDisplay(teacherGrade) }}/{{ teacherClassroom }}</span>
                             </div>
                         </div>
                     </template>
@@ -89,6 +89,7 @@ import { LeaveService } from '../../api/leave';
 import { ActivityService } from '../../api/activity';
 import CheckNameTable from '../../components/CheckName/Table.vue';
 import featureFlags from '../../config/featureFlags';
+import { mapGradeDisplay, toVisibleSortedGrades } from '../../utils/gradeSystem';
 import Swal from 'sweetalert2';
 
 const studentService = new StudentService();
@@ -126,12 +127,7 @@ const leaveStatusPriority = {
 };
 
 const gradeList = computed(() => {
-    const grades = new Set(classrooms.value.map(c => c.grade));
-    return Array.from(grades).sort((a, b) => {
-        const numA = parseInt(a.split('.')[1]);
-        const numB = parseInt(b.split('.')[1]);
-        return numA - numB;
-    });
+    return toVisibleSortedGrades(classrooms.value.map(c => c.grade));
 });
 
 const filteredClassrooms = computed(() => {
@@ -149,11 +145,7 @@ const loadClassrooms = async () => {
         classrooms.value = response.data || [];
 
         if (residentRole !== 'teacher' && selectedRole.value === 'student') {
-            const grades = Array.from(new Set(classrooms.value.map(c => c.grade))).sort((a, b) => {
-                const numA = parseInt(a.split('.')[1]);
-                const numB = parseInt(b.split('.')[1]);
-                return numA - numB;
-            });
+            const grades = toVisibleSortedGrades(classrooms.value.map(c => c.grade));
             if (grades.length > 0) {
                 selectedGrade.value = grades[0];
                 const firstClassroom = classrooms.value.find(c => c.grade === grades[0]);
@@ -235,11 +227,7 @@ const handleRoleChange = () => {
     if (selectedRole.value === 'teacher') {
         loadUsers();
     } else {
-        const grades = Array.from(new Set(classrooms.value.map(c => c.grade))).sort((a, b) => {
-            const numA = parseInt(a.split('.')[1]);
-            const numB = parseInt(b.split('.')[1]);
-            return numA - numB;
-        });
+        const grades = toVisibleSortedGrades(classrooms.value.map(c => c.grade));
         if (grades.length > 0) {
             selectedGrade.value = grades[0];
             const firstClassroom = classrooms.value.find(c => c.grade === grades[0]);

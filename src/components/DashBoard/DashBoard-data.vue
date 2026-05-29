@@ -15,7 +15,7 @@
                     <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                 </form>
                 <h3 class="font-bold text-lg mb-4">รายการเข้าเรียน{{ attendanceRole === 'teacher' ? 'ครู' : 'นักเรียน'
-                    }} วันที่ {{ displayDate }}</h3>
+                }} วันที่ {{ displayDate }}</h3>
                 <div v-if="attendanceRole === 'student'">
                     <Attendance :role="'student'" :date="selectedDate" v-if="residentRole !== 'teacher'" />
                     <Attendance :role="'student'" :date="selectedDate" v-else :fixed-grade="localGrade"
@@ -55,7 +55,7 @@
                     <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                 </form>
                 <h3 class="font-bold text-lg mb-4">รายการที่ไม่ได้สแกน{{ missedRole === 'teacher' ? 'ครู' : 'นักเรียน'
-                    }} วันที่
+                }} วันที่
                     {{ displayDate }}</h3>
 
                 <MissedTable :data="missedData" :pagination="missedPagination" :hide-export="true"
@@ -332,6 +332,7 @@ import ActivityTable from '../Report/ActivityTable.vue'
 import AttendanceDetail from '../Report/AttendanceDetail.vue'
 import Attendance from './Attendance.vue'
 import { useAuthStore } from '../../stores/auth'
+import { toVisibleSortedGrades } from '../../utils/gradeSystem'
 
 const auth = useAuthStore()
 const emit = defineEmits(['dateChange'])
@@ -430,12 +431,7 @@ const missedPagination = computed(() => ({
 
 const availableGrades = computed(() => {
     if (!classrooms.value || classrooms.value.length === 0) return []
-    const grades = [...new Set(classrooms.value.map(c => c.grade))]
-    return grades.sort((a, b) => {
-        const numA = parseInt(a.replace('ม.', ''))
-        const numB = parseInt(b.replace('ม.', ''))
-        return numA - numB
-    })
+    return toVisibleSortedGrades(classrooms.value.map(c => c.grade))
 })
 
 const availableClassrooms = computed(() => {

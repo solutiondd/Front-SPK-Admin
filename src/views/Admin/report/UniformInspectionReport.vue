@@ -18,7 +18,7 @@
                         @change="onGradeChange">
                         <option value="">ทั้งหมด</option>
                         <option v-for="grade in gradeOptions" :key="grade" :value="grade">
-                            {{ grade }}
+                            {{ mapGradeDisplay(grade) }}
                         </option>
                     </select>
                 </div>
@@ -40,7 +40,7 @@
                     <div
                         class="p-1 text-white bg-primary rounded-md text-center min-w-[120px] flex flex-col items-center">
                         <span class="label-text text-sm font-medium mb-1 text-secondary">ชั้นปี / ห้อง</span>
-                        <span>{{ teacherGrade }}/{{ teacherClassroom }}</span>
+                        <span>{{ mapGradeDisplay(teacherGrade) }}/{{ teacherClassroom }}</span>
                     </div>
                 </div>
 
@@ -55,6 +55,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { ClassRoomService } from '../../../api/class-room';
 import UniformInspectionTable from '../../../components/Report/UniformInspectionTable.vue';
+import { mapGradeDisplay, toVisibleSortedGrades } from '../../../utils/gradeSystem';
 
 const classRoomService = new ClassRoomService();
 
@@ -81,12 +82,7 @@ const appliedFilters = ref({
 });
 
 const gradeOptions = computed(() => {
-    const grades = [...new Set((classrooms.value || []).map((c) => c.grade).filter(Boolean))];
-    return grades.sort((a, b) => {
-        const na = parseInt(String(a).replace('ม.', ''), 10);
-        const nb = parseInt(String(b).replace('ม.', ''), 10);
-        return na - nb;
-    });
+    return toVisibleSortedGrades((classrooms.value || []).map((c) => c.grade).filter(Boolean));
 });
 
 const classroomOptions = computed(() => {
