@@ -31,7 +31,7 @@
             </div>
         </div>
 
-        <nav class="menu p-4 overflow-y-auto h-[calc(100vh-96px)]">
+        <nav class="menu p-4 max-[944px]:overflow-y-auto max-[944px]:h-[calc(100vh-96px)]">
             <ul class="space-y-2">
                 <li>
                     <router-link to="/home/dashboard"
