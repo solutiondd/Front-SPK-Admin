@@ -67,7 +67,7 @@
                                 <td>{{ student.first_name }}</td>
                                 <td>{{ student.last_name }}</td>
                                 <td>{{ student.rfid || '-' }}</td>
-                                <td>{{ student.grade }}</td>
+                                <td>{{ mapGradeDisplay(student.grade) }}</td>
                                 <td>{{ student.classroom }}</td>
                                 <td>{{ student.guardian_phone || '-' }}</td>
                                 <td>
@@ -110,6 +110,7 @@ import { ref, computed } from 'vue'
 import { StudentService } from '../../api/student'
 import * as XLSX from 'xlsx'
 import Swal from 'sweetalert2'
+import { mapGradeDisplay } from '../../utils/gradeSystem'
 
 async function resizeImage(file, maxSizeKB = 70, targetWidth = 450) {
     return new Promise((resolve, reject) => {
