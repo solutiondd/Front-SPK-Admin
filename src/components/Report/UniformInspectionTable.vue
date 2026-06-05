@@ -47,17 +47,22 @@
             </table>
         </div>
 
-        <div v-if="totalPages > 1" class="flex justify-center mt-4">
-            <div class="join">
-                <button class="join-item btn btn-sm" :disabled="pagination.page <= 1"
-                    @click="changePage(pagination.page - 1)">
-                    ก่อนหน้า
-                </button>
-                <button class="join-item btn btn-sm btn-active">{{ pagination.page }}/{{ totalPages }}</button>
-                <button class="join-item btn btn-sm" :disabled="pagination.page >= totalPages"
-                    @click="changePage(pagination.page + 1)">
-                    ถัดไป
-                </button>
+        <div v-if="totalPages > 1" class="flex flex-col items-center gap-2 mt-4">
+            <div class="flex justify-center">
+                <div class="join">
+                    <button class="join-item btn btn-sm" :disabled="pagination.page <= 1"
+                        @click="changePage(pagination.page - 1)">
+                        ก่อนหน้า
+                    </button>
+                    <button class="join-item btn btn-sm btn-active">{{ pagination.page }}/{{ totalPages }}</button>
+                    <button class="join-item btn btn-sm" :disabled="pagination.page >= totalPages"
+                        @click="changePage(pagination.page + 1)">
+                        ถัดไป
+                    </button>
+                </div>
+            </div>
+            <div class="text-center text-sm text-base-content/60">
+                ทั้งหมด {{ pagination.total }} รายการ (หน้า {{ pagination.page }} / {{ totalPages }})
             </div>
         </div>
 

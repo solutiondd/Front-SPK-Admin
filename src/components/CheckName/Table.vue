@@ -470,6 +470,8 @@ const props = defineProps({
 const pageSize = ref(10);
 const currentPage = ref(1);
 
+const totalItems = computed(() => (props.students || []).length);
+
 const totalPages = computed(() => Math.ceil((props.students?.length || 0) / pageSize.value));
 
 const paginatedStudents = computed(() => {

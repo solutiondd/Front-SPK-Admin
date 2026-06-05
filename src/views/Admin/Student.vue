@@ -125,19 +125,25 @@
         <DetailModal v-if="detailModalVisible && detailStudent" :visible="detailModalVisible" :student="detailStudent"
             @close="closeDetailModal" />
 
-        <div v-if="totalPages > 1" class="flex justify-center">
-            <div class="join">
-                <button class="join-item btn btn-sm" @click="goToPage(currentPage - 1)" :disabled="currentPage === 1">
-                    ‹
-                </button>
-                <button v-for="page in displayedPages" :key="page" class="join-item btn btn-sm"
-                    :class="{ 'btn-active': page === currentPage }" @click="goToPage(page)">
-                    {{ page }}
-                </button>
-                <button class="join-item btn btn-sm" @click="goToPage(currentPage + 1)"
-                    :disabled="currentPage === totalPages">
-                    ›
-                </button>
+        <div v-if="totalPages > 1" class="flex flex-col items-center gap-2">
+            <div class="flex justify-center">
+                <div class="join">
+                    <button class="join-item btn btn-sm" @click="goToPage(currentPage - 1)"
+                        :disabled="currentPage === 1">
+                        ‹
+                    </button>
+                    <button v-for="page in displayedPages" :key="page" class="join-item btn btn-sm"
+                        :class="{ 'btn-active': page === currentPage }" @click="goToPage(page)">
+                        {{ page }}
+                    </button>
+                    <button class="join-item btn btn-sm" @click="goToPage(currentPage + 1)"
+                        :disabled="currentPage === totalPages">
+                        ›
+                    </button>
+                </div>
+            </div>
+            <div class="text-sm text-base-content/60 text-center text-white">
+                ทั้งหมด {{ totalItems }} รายการ (หน้า {{ currentPage }} / {{ totalPages }})
             </div>
         </div>
     </div>
@@ -271,6 +277,8 @@ const filteredBySearch = computed(() => {
         student.code.toLowerCase().includes(query)
     )
 })
+
+const totalItems = computed(() => filteredBySearch.value.length)
 
 const totalPages = computed(() => Math.ceil(filteredBySearch.value.length / itemsPerPage.value))
 
