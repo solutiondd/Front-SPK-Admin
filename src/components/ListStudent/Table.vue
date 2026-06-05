@@ -52,16 +52,20 @@
                                             class="inline-block w-3 h-3 rounded-full"></span>
                                         <span class="text-xs">{{ student.has_password ? 'มีรหัสผ่าน' :
                                             'ยังไม่มีรหัสผ่าน'
-                                            }}</span>
+                                        }}</span>
                                     </template>
                                 </div>
                                 <span v-if="hasGuardian(student)" class="inline-flex items-center shrink-0">
                                     <span class="guardian-popover-root relative inline-flex items-center">
                                         <button type="button"
-                                            class="inline-flex h-5 min-w-10 items-center justify-center rounded-full bg-[#06C755] px-2 text-[10px] font-bold tracking-wide text-white cursor-pointer"
+                                            class="relative inline-flex h-5 min-w-10 items-center justify-center rounded-full bg-[#06C755] px-2 text-[10px] font-bold tracking-wide text-white cursor-pointer"
                                             :aria-expanded="isGuardianOpen(student)"
                                             @click.stop="toggleGuardian(student)">
-                                            {{ getGuardianButtonLabel(student) }}
+                                            <span>LINE</span>
+                                            <span v-if="getGuardianCount(student) > 1"
+                                                class="absolute -right-2 -top-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold leading-none text-error-content shadow">
+                                                {{ getGuardianCount(student) }}
+                                            </span>
                                         </button>
                                         <div v-if="isGuardianOpen(student)" @click.stop
                                             class="absolute right-full top-1/2 z-50 mr-2 w-64 max-w-[calc(100vw-2rem)] -translate-y-1/2 rounded-xl border border-base-300 bg-base-100 p-3 text-left shadow-xl md:left-auto md:right-0 md:translate-x-0">
@@ -178,7 +182,7 @@
                                             <div v-else
                                                 class="w-full h-full bg-secondary text-secondary-content flex items-center justify-center">
                                                 <span class="text-sm font-semibold">{{ getInitials(student.name)
-                                                    }}</span>
+                                                }}</span>
                                                 <svg class="ml-1 w-4 h-4 text-base-content/50" fill="none"
                                                     viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -220,10 +224,14 @@
                                     <span v-if="hasGuardian(student)"
                                         class="guardian-popover-root relative inline-flex items-center">
                                         <button type="button"
-                                            class="inline-flex h-5 min-w-10 items-center justify-center rounded-full bg-[#06C755] px-2 text-[10px] font-bold tracking-wide text-white cursor-pointer"
+                                            class="relative inline-flex h-5 min-w-10 items-center justify-center rounded-full bg-[#06C755] px-2 text-[10px] font-bold tracking-wide text-white cursor-pointer"
                                             :aria-expanded="isGuardianOpen(student)"
                                             @click.stop="toggleGuardian(student)">
-                                            {{ getGuardianButtonLabel(student) }}
+                                            <span>LINE</span>
+                                            <span v-if="getGuardianCount(student) > 1"
+                                                class="absolute -right-2 -top-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold leading-none text-error-content shadow">
+                                                {{ getGuardianCount(student) }}
+                                            </span>
                                         </button>
                                         <div v-if="isGuardianOpen(student)" @click.stop
                                             class="absolute right-full top-1/2 z-50 mr-2 w-64 max-w-[calc(100vw-2rem)] -translate-y-1/2 rounded-xl border border-base-300 bg-base-100 p-3 text-left shadow-xl md:left-auto md:right-0 md:translate-x-0">
@@ -246,7 +254,7 @@
                                                         <div class="text-xs text-base-content/60">
                                                             ผู้ปกครอง LINE{{ getGuardianCount(student) > 1 ? `
                                                             ${guardianIndex + 1}`
-                                                            : '' }}
+                                                                : '' }}
                                                         </div>
                                                         <div class="font-medium truncate">{{ guardian.name || '-' }}
                                                         </div>
@@ -403,11 +411,6 @@ const getGuardians = (student) => {
 }
 
 const getGuardianCount = (student) => getGuardians(student).length
-
-const getGuardianButtonLabel = (student) => {
-    const count = getGuardianCount(student)
-    return count > 1 ? `LINE(${count})` : 'LINE'
-}
 
 const hasGuardian = (student) => {
     return getGuardianCount(student) > 0
