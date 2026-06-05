@@ -81,4 +81,25 @@ export class UniformInspectionService {
       throw error;
     }
   }
+
+  async updateUniformInspection(id, data) {
+    try {
+      let config = {
+        method: "put",
+        maxBodyLength: Infinity,
+        url: `${this.baseUrl}uniform-inspections/${id}`,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.token}`,
+        },
+        data: JSON.stringify(data),
+      };
+
+      const response = await axios.request(config);
+      return response.data;
+    } catch (error) {
+      console.error("Update uniform inspection error:", error);
+      throw error;
+    }
+  }
 }

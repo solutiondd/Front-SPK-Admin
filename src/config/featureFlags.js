@@ -23,6 +23,11 @@ export default {
     enableUseCase: true, // true = แสดง Use Case, false = ซ่อน
   },
 
+  // ฟีเจอร์สำหรับหน้านักเรียน
+  student: {
+    enableLineStatusFilter: false, // true = แสดงตัวกรองสถานะ LINE, false = ซ่อน
+  },
+
   // ฟีเจอร์สำหรับเมนู
   menu: {
     enableUniformInspection: true, // เมนูตรวจเครื่องแบบ

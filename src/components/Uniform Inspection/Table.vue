@@ -171,8 +171,12 @@
                     <label class="label">
                         <span class="label-text">หมายเหตุ (ไม่บังคับ)</span>
                     </label>
-                    <textarea v-model="failModal.form.remark" class="textarea textarea-bordered"
-                        placeholder="เช่น เตือนครั้งที่ 1" rows="3"></textarea>
+                    <select v-model="failModal.form.remark" class="select select-bordered w-full">
+                        <option value="">ไม่เลือก (ไม่หักคะแนน)</option>
+                        <option v-for="option in remarkOptions" :key="option" :value="option">
+                            {{ option }}
+                        </option>
+                    </select>
                 </div>
 
                 <div class="modal-action">
@@ -237,13 +241,23 @@ const issueOptions = [
     'เครื่องประดับไม่ถูกระเบียบ',
 ];
 
+const remarkOptions = [
+    'ตักเตือน ลงบันทึก -5 คะแนน',
+    'แจ้ง หรือ เชิญผู้ปกครองรับทราบ -10 คะแนน',
+    'เชิญผู้ปกครองทำ จค.กก.1/1 ครั้งที่ 1 -15 คะแนน',
+    'เชิญผู้ปกครองทำ จค.กก.1/1 ครั้งที่ 2 -15 คะแนน',
+    'เชิญผู้ปกครองทำทัณฑ์บน -30 คะแนน',
+];
+
+const DEFAULT_REMARK = 'ตักเตือน ลงบันทึก -5 คะแนน';
+
 const failModal = ref({
     show: false,
     studentId: null,
     form: {
         issues: [],
         customIssue: '',
-        remark: '',
+        remark: DEFAULT_REMARK,
     },
 });
 
@@ -323,12 +337,16 @@ const openFailModal = (studentId) => {
 
     const selectedPresetIssues = existingIssues.filter((issue) => issueOptions.includes(issue));
     const customIssues = existingIssues.filter((issue) => !issueOptions.includes(issue));
+    const hasSavedRemark = Object.prototype.hasOwnProperty.call(existing, 'remark');
+    const selectedRemark = hasSavedRemark
+        ? (remarkOptions.includes(existing.remark) ? existing.remark : '')
+        : DEFAULT_REMARK;
 
     failModal.value.studentId = studentId;
     failModal.value.form = {
         issues: selectedPresetIssues,
         customIssue: customIssues.join(', '),
-        remark: existing.remark || '',
+        remark: selectedRemark,
     };
     failModal.value.show = true;
 };

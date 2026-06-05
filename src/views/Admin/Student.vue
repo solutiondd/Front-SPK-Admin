@@ -35,7 +35,7 @@
 
         <div class="card bg-base-100 shadow-md">
             <div class="card-body p-4">
-                <div class="flex flex-col sm:flex-row gap-3">
+                <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3">
                     <div v-if="auth.user?.role !== 'teacher'" class="form-control w-full sm:w-auto"
                         :class="searchUserid ? 'opacity-50 pointer-events-none' : ''">
                         <label class="label py-1">
@@ -44,6 +44,7 @@
                         <select v-model="selectedGrade" @change="handleGradeChange"
                             class="select select-bordered select-sm w-full sm:w-32"
                             :disabled="isQueryFilter || !!searchUserid">
+                            <option v-if="lineConnectFilter !== ''" value="">ทั้งหมด</option>
                             <option v-for="grade in availableGrades" :key="grade" :value="grade">{{
                                 mapGradeDisplay(grade) }}</option>
                         </select>
@@ -57,6 +58,7 @@
                         <select v-model="selectedClassroom" @change="fetchStudents"
                             class="select select-bordered select-sm w-full sm:w-24"
                             :disabled="isQueryFilter || !!searchUserid">
+                            <option v-if="lineConnectFilter !== ''" value="">ทั้งหมด</option>
                             <option v-for="room in availableClassrooms" :key="room" :value="room">{{ room }}</option>
                         </select>
                     </div>
@@ -67,9 +69,20 @@
                         </label>
                         <div class="relative flex gap-2">
                             <input v-model="searchUserid" @input="debouncedSearchByUserid" type="text"
-                                placeholder="ค้นหาชื่อหรือรหัสนักเรียน..."
-                                class="input input-bordered input-sm w-full" />
+                                placeholder="ค้นหาชื่อหรือรหัสนักเรียน..." class="input input-bordered input-sm w-full"
+                                :disabled="lineConnectFilter !== ''" />
                         </div>
+                    </div>
+                    <div v-if="featureFlags.student.enableLineStatusFilter" class="form-control max-[1000px]:basis-full">
+                        <label class="label py-1">
+                            <span class="label-text text-sm">สถานะ LINE</span>
+                        </label>
+                        <select v-model="lineConnectFilter" @change="handleLineConnectFilterChange"
+                            class="select select-bordered select-sm w-full sm:w-36">
+                            <option value="">ทั้งหมด</option>
+                            <option value="connected">เชื่อม LINE</option>
+                            <option value="notconnected">ยังไม่เชื่อม LINE</option>
+                        </select>
                     </div>
                     <div class="flex justify-between sm:justify-start w-full sm:w-auto gap-2">
                         <div class="flex items-end">
@@ -144,6 +157,7 @@ import DetailModal from '../../components/ListStudent/Detail.vue'
 import { StudentService } from '../../api/student'
 import { ClassRoomService } from '../../api/class-room'
 import { useAuthStore } from '../../stores/auth'
+import featureFlags from '../../config/featureFlags'
 import { isTerminalSecondaryGrade, mapGradeDisplay, toVisibleSortedGrades } from '../../utils/gradeSystem'
 
 const isQueryFilter = ref(false)
@@ -176,6 +190,9 @@ const imageBaseUrl = import.meta.env.VITE_IMG_PROFILE_URL
 const lastFetchedGrade = ref('')
 const lastFetchedClassroom = ref('')
 const searchUserid = ref("");
+const lineConnectFilter = ref('')
+const lastLineConnectFilter = ref('')
+const sendEmptyGradeClassroomOnce = ref(false)
 const detailModalVisible = ref(false)
 const detailStudent = ref(null)
 
@@ -321,8 +338,27 @@ const fetchStudents = async () => {
     loading.value = true
     currentPage.value = 1
     searchQuery.value = ''
+    const useEmptyGradeClassroom = sendEmptyGradeClassroomOnce.value
     try {
-        const response = await studentService.getStudents(selectedGrade.value, selectedClassroom.value)
+        const effectiveLineConnectFilter = featureFlags.student.enableLineStatusFilter ? lineConnectFilter.value : ''
+        const keyword = effectiveLineConnectFilter ? '' : searchUserid.value.trim()
+        let userid = ''
+        let name = ''
+        if (keyword) {
+            if (/^\d+$/.test(keyword)) {
+                userid = keyword
+            } else {
+                name = keyword
+            }
+        }
+
+        const response = await studentService.getStudents(
+            useEmptyGradeClassroom ? '' : selectedGrade.value,
+            useEmptyGradeClassroom ? '' : selectedClassroom.value,
+            userid,
+            name,
+            effectiveLineConnectFilter
+        )
         if (response.message === 'Success' && response.data) {
             students.value = response.data.map(mapStudentRow)
             if (response.data.length > 0) {
@@ -347,6 +383,9 @@ const fetchStudents = async () => {
         })
         students.value = []
     } finally {
+        if (sendEmptyGradeClassroomOnce.value) {
+            sendEmptyGradeClassroomOnce.value = false
+        }
         loading.value = false
     }
 }
@@ -360,6 +399,7 @@ const resetFilters = () => {
     }
     searchQuery.value = ''
     searchUserid.value = ''
+    lineConnectFilter.value = ''
     fetchStudents()
 }
 
@@ -419,32 +459,6 @@ const handleCreateSuccess = async (formData) => {
     }
 }
 
-
-const searchByUserid = async () => {
-    if (!searchUserid.value) return;
-    loading.value = true;
-    try {
-        let userid = '';
-        let name = '';
-        if (/^\d+$/.test(searchUserid.value)) {
-            userid = searchUserid.value;
-        } else {
-            name = searchUserid.value;
-        }
-        const response = await studentService.getStudents(selectedGrade.value, selectedClassroom.value, userid, name);
-        if (response.message === 'Success' && response.data) {
-            students.value = response.data.map(mapStudentRow);
-            currentPage.value = 1;
-        } else {
-            students.value = [];
-        }
-    } catch (error) {
-        students.value = [];
-    } finally {
-        loading.value = false;
-    }
-}
-
 function debounce(fn, delay) {
     let timeoutId;
     return function (...args) {
@@ -454,12 +468,28 @@ function debounce(fn, delay) {
 }
 
 const debouncedSearchByUserid = debounce(() => {
-    if (searchUserid.value) {
-        searchByUserid();
-    } else {
-        fetchStudents();
-    }
+    fetchStudents()
 }, 400);
+
+const handleLineConnectFilterChange = () => {
+    const isFirstLineFilterSelect = !lastLineConnectFilter.value && !!lineConnectFilter.value
+    sendEmptyGradeClassroomOnce.value = isFirstLineFilterSelect
+
+    if (isFirstLineFilterSelect) {
+        selectedGrade.value = ''
+        selectedClassroom.value = ''
+    }
+
+    if (lineConnectFilter.value) {
+        searchUserid.value = ''
+    } else if (!selectedGrade.value && availableGrades.value.length > 0) {
+        selectedGrade.value = availableGrades.value[0]
+        selectedClassroom.value = availableClassrooms.value[0] || ''
+    }
+
+    lastLineConnectFilter.value = lineConnectFilter.value
+    fetchStudents()
+}
 
 const openUpdateModal = (student) => {
     updateModalRef.value.openModal(student)
