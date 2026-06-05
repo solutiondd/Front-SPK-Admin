@@ -23,7 +23,7 @@ export default {
     enableUseCase: true, // true = แสดง Use Case, false = ซ่อน
   },
 
-  // ฟีเจอร์สำหรับหน้านักเรียน
+  // ฟีเจอร์สำหรับไลน์หน้านักเรียน
   student: {
     enableLineStatusFilter: false, // true = แสดงตัวกรองสถานะ LINE, false = ซ่อน
   },

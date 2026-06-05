@@ -57,7 +57,7 @@
                         <td>{{ item.name }}</td>
                         <td class="text-center">
                             <span v-if="role === 'student'">{{ formatGradeClassroomDisplay(item.grade, item.classroom)
-                                }}</span>
+                            }}</span>
                             <span v-else>{{ item.department || '-' }}</span>
                         </td>
                         <td class="text-center">{{ totalDays }}</td>
@@ -82,7 +82,7 @@
                         <h3 class="font-bold text-lg">{{ item.name }}</h3>
                         <p class="text-sm text-base-content/70">
                             <span v-if="role === 'student'">{{ formatGradeClassroomDisplay(item.grade, item.classroom)
-                                }}</span>
+                            }}</span>
                             <span v-else>{{ item.department || '-' }}</span>
                         </p>
                     </div>
@@ -141,8 +141,7 @@
     </div>
     <div v-if="pagination && pagination.total_items > 0"
         class="text-center text-sm text-white text-base-content/60 mt-2">
-        แสดง {{ ((pagination.page - 1) * pagination.limit) + 1 }} - {{ Math.min(pagination.page * pagination.limit,
-            pagination.total_items) }} จาก {{ pagination.total_items }} รายการ
+        ทั้งหมด {{ pagination.total_items }} รายการ (หน้า {{ pagination.page }} / {{ pagination.total_pages }})
     </div>
 </template>
 

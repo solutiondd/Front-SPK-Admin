@@ -319,9 +319,7 @@
     </div>
 
     <div v-if="pagination.total_items > 0" class="text-center text-sm text-base-content/60 mt-4 text-white">
-        แสดง {{ ((pagination.page - 1) * pagination.limit) + 1 }} - {{
-            Math.min(pagination.page * pagination.limit, pagination.total_items)
-        }} จาก {{ pagination.total_items }} รายการ
+        ทั้งหมด {{ pagination.total_items }} รายการ (หน้า {{ pagination.page }} / {{ pagination.total_pages }})
     </div>
 
     <dialog ref="imageModal" class="modal">
