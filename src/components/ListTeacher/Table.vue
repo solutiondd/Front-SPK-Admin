@@ -95,7 +95,7 @@
                 <table class="table table-zebra table-xs sm:table-sm md:table-md">
                     <thead>
                         <tr>
-                            <th class="bg-primary text-primary-content hidden lg:table-cell">#</th>
+                            <th class="bg-primary text-primary-content hidden xl:table-cell">#</th>
                             <th class="bg-primary text-primary-content">ชื่อ-นามสกุล</th>
                             <th class="bg-primary text-primary-content hidden sm:table-cell">รหัสบุคลากร</th>
                             <th class="bg-primary text-primary-content hidden md:table-cell">
@@ -160,7 +160,7 @@
                             </td>
                         </tr>
                         <tr v-else v-for="(teacher, index) in teachers" :key="teacher.id" class="hover">
-                            <td class="hidden lg:table-cell">{{ getRowNumber(index) }}</td>
+                            <td class="hidden xl:table-cell">{{ getRowNumber(index) }}</td>
                             <td>
                                 <div class="flex items-center gap-3">
                                     <div class="avatar">

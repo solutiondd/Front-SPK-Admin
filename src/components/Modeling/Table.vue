@@ -10,7 +10,7 @@
                     <th class="text-center">ลำดับ</th>
                     <th>ชื่อ-สกุล</th>
                     <th class="text-center">รหัสนักเรียน/รหัสอาจารย์</th>
-                    <th class="text-center">ตำแหน่ง</th>
+                    <th class="text-center max-[1307px]:hidden">ตำแหน่ง</th>
                     <th class="text-center">ห้องเรียน/แผนก</th>
                     <th class="text-center">สถานะการเชื่อมต่อ</th>
                     <th v-if="auth.user?.role !== 'viewer'" class="text-center">จัดการ</th>
@@ -45,7 +45,7 @@
                         </div>
                     </td>
                     <td class="text-center">{{ item.userid }}</td>
-                    <td class="text-center">{{ item.position }}</td>
+                    <td class="text-center max-[1307px]:hidden">{{ item.position }}</td>
                     <td class="text-center">
                         <span v-if="item.role === 'student'">
                             {{ formatGradeClassroomDisplay(item.grade, item.classroom) }}
@@ -59,7 +59,8 @@
                             class="text-center text-base-content/60">
                             ยังไม่ได้เชื่อมต่ออุปกรณ์
                         </div>
-                        <div v-else class="flex items-center justify-center gap-2">
+                        <div v-else
+                            class="flex items-center justify-center gap-2 max-[1307px]:grid max-[1307px]:grid-cols-4 max-[1307px]:justify-items-center max-[1307px]:gap-1">
                             <div v-for="(model, idx) in item.modeling" :key="idx" class="tooltip tooltip-top"
                                 :data-tip="`${model.device.location} - ${statusLabel(model.status)}${model.result_msg ? ' (' + model.result_msg + ')' : ''}`">
                                 <div :class="[
