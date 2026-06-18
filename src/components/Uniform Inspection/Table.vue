@@ -141,11 +141,6 @@
             </div>
         </div>
 
-        <div v-if="students.length > 0" class="text-center text-sm text-gray-600">
-            แสดง {{ (currentPage - 1) * pageSize + 1 }} - {{ Math.min(currentPage * pageSize, students.length) }} จาก {{
-                students.length }} รายการ
-        </div>
-
         <dialog v-if="failModal.show" class="modal modal-open">
             <div class="modal-box w-[calc(100vw-1.5rem)] max-w-lg p-4 sm:p-6 overflow-x-hidden">
                 <h3 class="font-bold text-lg mb-4">บันทึกการแต่งกายไม่ผ่านระเบียบ</h3>

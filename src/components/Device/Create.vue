@@ -41,6 +41,8 @@
                         <option value="Aifacescan">AI Face CC</option>
                         <option value="intfacecam">Int Face Cam</option>
                         <option value="hikfacescan">Hik Face Scan</option>
+                        <option value="qsdmask_facescan">QSDMASK Face Scan</option>
+                        <option value="megapixel_facescan">MEGAPIXEL Face Scan</option>
                     </select>
                 </div>
 

@@ -63,8 +63,8 @@
                         <td class="text-center">{{ totalDays }}</td>
                         <td class="text-center text-green-600">{{ countPresentNormal(item.attendances) }}</td>
                         <td class="text-center text-red-500">{{ totalDays - countPresentNormal(item.attendances) -
-                            countLate(item.attendances) }}</td>
-                        <td class="text-center text-blue-500">{{ countLate(item.attendances) }}</td>
+                            countLate(item) }}</td>
+                        <td class="text-center text-blue-500">{{ countLate(item) }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -113,11 +113,11 @@
                     <div>
                         <span class="text-base-content/60">ไม่ได้สแกน</span>
                         <p class="font-medium text-red-500">{{ totalDays - countPresentNormal(item.attendances) -
-                            countLate(item.attendances) }}</p>
+                            countLate(item) }}</p>
                     </div>
                     <div>
                         <span class="text-base-content/60">มาสาย</span>
-                        <p class="font-medium text-blue-500">{{ countLate(item.attendances) }}</p>
+                        <p class="font-medium text-blue-500">{{ countLate(item) }}</p>
                     </div>
                 </div>
             </div>
@@ -609,7 +609,7 @@ async function exportAllToExcel() {
         const totalDaysVal = workingDaysArr.length
         const rows = allData.map(item => {
             const presentNormal = countPresentNormal(item.attendances)
-            const late = countLate(item.attendances)
+            const late = countLate(item)
             return {
                 'รหัส': item.userid,
                 'ชื่อ - นามสกุล': item.name,
@@ -759,14 +759,18 @@ function countPresentNormal(attendances) {
     return count
 }
 
-function countLate(attendances) {
-    if (!attendances) return 0
+function countLate(item) {
+    if (item && Array.isArray(item.late_dates)) {
+        return item.late_dates.length
+    }
+
+    const attendances = item.attendances || item
+    if (!Array.isArray(attendances)) return 0
+
     let lateCount = 0
     attendances.forEach(att => {
         if (!att.timeStamps || att.timeStamps.length === 0) return
-        const first = att.timeStamps
-            .map(ts => ts.timestamp)
-            .sort()[0]
+        const first = att.timeStamps.map(ts => ts.timestamp).sort()[0]
         if (first) {
             const time = first.split(' ')[1]
             if (time > '08:01:00') lateCount++

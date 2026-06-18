@@ -73,7 +73,8 @@
                                 :disabled="lineConnectFilter !== ''" />
                         </div>
                     </div>
-                    <div v-if="featureFlags.student.enableLineStatusFilter" class="form-control max-[1000px]:basis-full">
+                    <div v-if="featureFlags.student.enableLineStatusFilter"
+                        class="form-control max-[1000px]:basis-full">
                         <label class="label py-1">
                             <span class="label-text text-sm">สถานะ LINE</span>
                         </label>
@@ -360,13 +361,15 @@ const fetchStudents = async () => {
             }
         }
 
+        const isSearching = !!searchUserid.value.trim()
+
         const response = await studentService.getStudents(
-            useEmptyGradeClassroom ? '' : selectedGrade.value,
-            useEmptyGradeClassroom ? '' : selectedClassroom.value,
-            userid,
-            name,
-            effectiveLineConnectFilter
-        )
+    (useEmptyGradeClassroom || isSearching) ? '' : selectedGrade.value,
+    (useEmptyGradeClassroom || isSearching) ? '' : selectedClassroom.value,
+    userid,
+    name,
+    effectiveLineConnectFilter
+)
         if (response.message === 'Success' && response.data) {
             students.value = response.data.map(mapStudentRow)
             if (response.data.length > 0) {

@@ -268,25 +268,26 @@
             </table>
         </div>
 
-        <div v-if="totalPages > 1" class="flex justify-center gap-2">
-            <div class="join shadow-lg">
-                <button @click="currentPage = 1" class="join-item btn btn-sm" :disabled="currentPage === 1">
-                    ‹
-                </button>
-                <button v-for="page in visiblePages" :key="page" @click="currentPage = page"
-                    :class="['join-item btn btn-sm', page === currentPage ? 'btn-active' : '']">
-                    {{ page }}
-                </button>
-                <button @click="currentPage = totalPages" class="join-item btn btn-sm"
-                    :disabled="currentPage === totalPages">
-                    ›
-                </button>
+        <div v-if="totalPages > 1" class="flex flex-col items-center gap-2">
+            <div class="flex justify-center gap-2">
+                <div class="join shadow-lg">
+                    <button @click="currentPage = 1" class="join-item btn btn-sm" :disabled="currentPage === 1">
+                        ‹
+                    </button>
+                    <button v-for="page in visiblePages" :key="page" @click="currentPage = page"
+                        :class="['join-item btn btn-sm', page === currentPage ? 'btn-active' : '']">
+                        {{ page }}
+                    </button>
+                    <button @click="currentPage = totalPages" class="join-item btn btn-sm"
+                        :disabled="currentPage === totalPages">
+                        ›
+                    </button>
+                </div>
             </div>
-        </div>
 
-        <div v-if="students.length > 0" class="text-center text-sm text-gray-600">
-            แสดง {{ (currentPage - 1) * pageSize + 1 }} - {{ Math.min(currentPage * pageSize, students.length) }} จาก {{
-                students.length }} รายการ
+            <div v-if="totalItems > 0" class="text-center text-sm text-gray-600">
+                ทั้งหมด {{ totalItems }} รายการ (หน้า {{ currentPage }} / {{ totalPages }})
+            </div>
         </div>
 
         <!-- Modals การลา -->
