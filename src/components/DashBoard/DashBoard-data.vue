@@ -345,7 +345,7 @@ import { AllowanceService } from '../../api/allowance'
 const auth = useAuthStore()
 const emit = defineEmits(['dateChange'])
 const studentCardRef = ref(null)
-const selectedDate = ref(new Date().toISOString().split('T')[0])
+const selectedDate = ref(new Date().toLocaleDateString('sv-SE'))
 const allowanceRules = ref([]);
 
 function getDefaultDate() {

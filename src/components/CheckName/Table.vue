@@ -726,8 +726,8 @@ const openActivityModal = async (studentId, mode = 'create') => {
         activity_date_end: mode === 'edit'
             ? (normalizeDateInput(current.activityDateEnd) || normalizeDateInput(current.activityDateStart) || defaultDate)
             : defaultDate,
-        start_time: mode === 'edit' ? (current.startTime || '') : '',
-        end_time: mode === 'edit' ? (current.endTime || '') : '',
+        start_time: mode === 'edit' ? (current.startTime || '') : '08:00:00',
+        end_time: mode === 'edit' ? (current.endTime || '') : '17:00:00',
         location: mode === 'edit' ? (current.location || '') : '',
         remark: mode === 'edit' ? (current.remark || '') : '',
     };
@@ -839,6 +839,17 @@ const setPendingPreviousActivity = (studentId, previousActivity) => {
     }
 };
 
+const formatTimeToSeconds = (timeStr) => {
+    if (!timeStr) return '';
+    if (/^\d{2}:\d{2}$/.test(timeStr)) {
+        return `${timeStr}:00`;
+    }
+    if (/^\d{2}:\d{2}:\d{2}$/.test(timeStr)) {
+        return timeStr;
+    }
+    return timeStr;
+}
+
 const createActivityRequest = async () => {
     if (autoSaving.value) return;
 
@@ -863,9 +874,19 @@ const createActivityRequest = async () => {
         return;
     }
 
+    const startTimeFormatted = formatTimeToSeconds(activityModal.value.form.start_time || '00:00');
+    const endTimeFormatted = formatTimeToSeconds(activityModal.value.form.end_time || '23:59');
+
     if (activityDateEnd < activityDateStart) {
         Swal.fire('แจ้งเตือน', 'วันสิ้นสุดกิจกรรมต้องไม่น้อยกว่าวันเริ่มกิจกรรม', 'warning');
         return;
+    }
+
+    if (activityDateStart === activityDateEnd) {
+        if (endTimeFormatted <= startTimeFormatted) {
+            Swal.fire('แจ้งเตือน', 'เวลาสิ้นสุดต้องมากกว่าเวลาเริ่มต้นเสมอสำหรับกิจกรรมในวันเดียวกัน', 'warning');
+            return;
+        }
     }
 
     autoSaving.value = true;
@@ -874,8 +895,8 @@ const createActivityRequest = async () => {
             activity_name: activityModal.value.form.activity_name,
             activity_date_start: activityDateStart,
             activity_date_end: activityDateEnd,
-            start_time: activityModal.value.form.start_time || '',
-            end_time: activityModal.value.form.end_time || '',
+            start_time: startTimeFormatted,
+            end_time: endTimeFormatted,
             location: activityModal.value.form.location || '',
             status: 'เข้าร่วม',
             remark: activityModal.value.form.remark || '',
@@ -905,8 +926,8 @@ const createActivityRequest = async () => {
                     activityName: activityModal.value.form.activity_name,
                     activityDateStart,
                     activityDateEnd,
-                    startTime: activityModal.value.form.start_time || '',
-                    endTime: activityModal.value.form.end_time || '',
+                    startTime: startTimeFormatted,
+                    endTime: endTimeFormatted,
                     location: activityModal.value.form.location || '',
                     remark: activityModal.value.form.remark || '',
                 }
@@ -927,8 +948,8 @@ const createActivityRequest = async () => {
                 activityName: activityModal.value.form.activity_name,
                 activityDateStart: activityDateStart,
                 activityDateEnd: activityDateEnd,
-                startTime: activityModal.value.form.start_time || '',
-                endTime: activityModal.value.form.end_time || '',
+                startTime: startTimeFormatted,
+                endTime: endTimeFormatted,
                 location: activityModal.value.form.location || '',
                 remark: activityModal.value.form.remark || '',
             };

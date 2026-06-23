@@ -55,7 +55,7 @@
                                 <td class="text-center">
                                     <span v-if="item.position === 'นักเรียน'">{{ formatGradeClassroomDisplay(item.grade,
                                         item.classroom) }}</span>
-                                    <span v-else>-</span>
+                                    <span v-else>{{ item.department || '-' }}</span>
                                 </td>
                                 <td class="text-center">{{ formatDate(item.late_dates[0].date) }}</td>
                                 <td class="text-center">
@@ -171,7 +171,7 @@
                             <td class="text-center">
                                 <span v-if="item.position === 'นักเรียน'">{{ formatGradeClassroomDisplay(item.grade,
                                     item.classroom) }}</span>
-                                <span v-else>-</span>
+                                <span v-else>{{ item.department || '-' }}</span>
                             </td>
                             <td class="text-center">-</td>
                             <td class="text-center"><span class="badge badge-error badge-sm">-</span></td>
