@@ -396,6 +396,7 @@ const missedTotalItems = ref(0)
 const missedTotalPages = ref(0)
 const missedRole = ref('student')
 const classrooms = ref([])
+// const progressData = ref([])
 const studentLeave = ref(0)
 const teacherLeave = ref(0)
 const studentActivity = ref(0)
@@ -917,6 +918,20 @@ const fetchAllowanceSettings = async () => {
         console.error("Error fetching allowance settings in dashboard:", error);
     }
 };
+
+// async function fetchProgressData() {
+//     try {
+//         const res = await reportApi.getProgressReport({ date: selectedDate.value })
+//         if (res && res.message === 'Success') {
+//             progressData.value = res.data || []
+//         } else {
+//             progressData.value = []
+//         }
+//     } catch (e) {
+//         console.error('Error fetching progress report on dashboard:', e)
+//         progressData.value = []
+//     }
+// }
 
 onMounted(() => {
     showStudentStat.value = false

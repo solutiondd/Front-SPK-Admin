@@ -156,7 +156,7 @@ const loadClassrooms = async () => {
             }
         }
     } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดรายชื่อห้องเรียนได้', 'error');
+        Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error?.message || 'ไม่สามารถโหลดรายชื่อห้องเรียนได้', 'error');
         console.error('Load classrooms error:', error);
     }
 };
@@ -502,7 +502,7 @@ const loadUsers = async () => {
             students.value = studentList;
             await mapDailyStatus(studentList, 'student');
         } catch (error) {
-            Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดรายชื่อนักเรียนได้', 'error');
+            Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error?.message || 'ไม่สามารถโหลดรายชื่อนักเรียนได้', 'error');
             console.error('Load students error:', error);
         } finally {
             loading.value = false;
@@ -516,7 +516,7 @@ const loadUsers = async () => {
             students.value = teacherList;
             await mapDailyStatus(teacherList, 'teacher');
         } catch (error) {
-            Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดรายชื่อครูได้', 'error');
+            Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error?.message || 'ไม่สามารถโหลดรายชื่อครูได้', 'error');
             console.error('Load teachers error:', error);
         } finally {
             loading.value = false;

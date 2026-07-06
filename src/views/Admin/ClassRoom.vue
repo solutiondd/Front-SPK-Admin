@@ -106,7 +106,7 @@ const fetchClassRooms = async () => {
         Swal.fire({
             icon: 'error',
             title: 'เกิดข้อผิดพลาด',
-            text: 'ไม่สามารถโหลดข้อมูลห้องเรียนได้',
+            text: error?.response?.data?.error || error?.message || 'ไม่สามารถโหลดข้อมูลห้องเรียนได้',
             confirmButtonColor: '#2563eb',
             didOpen: () => {
                 document.getElementById('app').removeAttribute('aria-hidden')
@@ -164,7 +164,7 @@ const handleCreateSuccess = async (formData) => {
         Swal.fire({
             icon: 'error',
             title: 'เกิดข้อผิดพลาด',
-            text: error.response?.data?.error || 'ไม่สามารถเพิ่มห้องเรียนได้',
+            text: error?.response?.data?.error || error?.message || 'ไม่สามารถเพิ่มห้องเรียนได้',
             confirmButtonColor: '#2563eb',
             didOpen: () => {
                 document.getElementById('app').removeAttribute('aria-hidden')
@@ -196,7 +196,7 @@ const handleUpdateSuccess = async (formData) => {
         Swal.fire({
             icon: 'error',
             title: 'เกิดข้อผิดพลาด',
-            text: 'ไม่สามารถแก้ไขห้องเรียนได้',
+            text: error?.response?.data?.error || error?.message || 'ไม่สามารถแก้ไขห้องเรียนได้',
             confirmButtonColor: '#2563eb',
             didOpen: () => {
                 document.getElementById('app').removeAttribute('aria-hidden')

@@ -648,7 +648,7 @@ const markPresent = async (studentId) => {
             remark: '',
         });
     } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', 'บันทึกสถานะมาเรียนไม่สำเร็จ', 'error');
+        Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error?.message || 'บันทึกสถานะมาเรียนไม่สำเร็จ', 'error');
         console.error('Auto save present error:', error);
     } finally {
         autoSaving.value = false;
@@ -1005,7 +1005,7 @@ const deletePendingActivity = async (studentId) => {
         emit('update:pendingLeaveApprovals', localPendingLeaveApprovals.value);
         Swal.fire('สำเร็จ', 'ลบกิจกรรมเรียบร้อยแล้ว', 'success');
     } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', 'ลบกิจกรรมไม่สำเร็จ', 'error');
+        Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error?.message || 'ลบกิจกรรมไม่สำเร็จ', 'error');
         console.error('Delete pending activity error:', error);
     } finally {
         autoSaving.value = false;
@@ -1040,7 +1040,7 @@ const deleteActivity = async (studentId) => {
         emit('update:attendanceData', localAttendanceData.value);
         Swal.fire('สำเร็จ', 'ลบกิจกรรมเรียบร้อยแล้ว', 'success');
     } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', 'ลบกิจกรรมไม่สำเร็จ', 'error');
+        Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error?.message || 'ลบกิจกรรมไม่สำเร็จ', 'error');
         console.error('Delete activity error:', error);
     } finally {
         autoSaving.value = false;
@@ -1207,7 +1207,7 @@ const approveLeave = async (studentId) => {
         emit('update:pendingLeaveApprovals', localPendingLeaveApprovals.value);
         Swal.fire('สำเร็จ', 'อนุมัติการลาแล้ว', 'success');
     } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', 'บันทึกการอนุมัติลาไม่สำเร็จ', 'error');
+        Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error?.message || 'บันทึกการอนุมัติลาไม่สำเร็จ', 'error');
         console.error('Approve leave error:', error);
     } finally {
         autoSaving.value = false;
@@ -1236,7 +1236,7 @@ const rejectLeave = async (studentId) => {
         emit('update:pendingLeaveApprovals', localPendingLeaveApprovals.value);
         Swal.fire('สำเร็จ', 'ไม่อนุมัติการลา', 'success');
     } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', 'บันทึกการไม่อนุมัติลาไม่สำเร็จ', 'error');
+        Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error?.message || 'บันทึกการไม่อนุมัติลาไม่สำเร็จ', 'error');
         console.error('Reject leave error:', error);
     } finally {
         autoSaving.value = false;
@@ -1265,7 +1265,7 @@ const cancelLeave = async (studentId) => {
         emit('update:pendingLeaveApprovals', localPendingLeaveApprovals.value);
         Swal.fire('สำเร็จ', 'ยกเลิกรายการลาแล้ว', 'success');
     } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', 'ยกเลิกรายการลาไม่สำเร็จ', 'error');
+        Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error?.message || 'ยกเลิกรายการลาไม่สำเร็จ', 'error');
         console.error('Cancel leave error:', error);
     } finally {
         autoSaving.value = false;
