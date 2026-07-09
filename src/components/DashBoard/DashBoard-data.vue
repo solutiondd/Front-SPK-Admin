@@ -1011,23 +1011,23 @@ onMounted(() => {
         containerEl3.addEventListener('mouseleave', stopAnim3)
     }
 
-    if (studentLateIconRef.value) {
-        const animLate = lottie.loadAnimation({
-            container: studentLateIconRef.value,
-            renderer: 'svg',
-            loop: true,
-            autoplay: false,
-            path: new URL('../../assets/doodle-color-292-clock-time-hover-pinch.json', import.meta.url).href,
-        })
-        animLate.addEventListener('DOMLoaded', () => {
-            animLate.goToAndStop(0, true)
-        })
-        const containerLate = studentCardRef.value || studentLateStatRef.value || studentLateIconRef.value
-        const playLate = () => animLate.play()
-        const stopLate = () => animLate.stop()
-        containerLate.addEventListener('mouseenter', playLate)
-        containerLate.addEventListener('mouseleave', stopLate)
-    }
+    // if (studentLateIconRef.value) {
+    //     const animLate = lottie.loadAnimation({
+    //         container: studentLateIconRef.value,
+    //         renderer: 'svg',
+    //         loop: true,
+    //         autoplay: false,
+    //         path: new URL('../../assets/doodle-color-292-clock-time-hover-pinch.json', import.meta.url).href,
+    //     })
+    //     animLate.addEventListener('DOMLoaded', () => {
+    //         animLate.goToAndStop(0, true)
+    //     })
+    //     const containerLate = studentCardRef.value || studentLateStatRef.value || studentLateIconRef.value
+    //     const playLate = () => animLate.play()
+    //     const stopLate = () => animLate.stop()
+    //     containerLate.addEventListener('mouseenter', playLate)
+    //     containerLate.addEventListener('mouseleave', stopLate)
+    // }
 })
 </script>
 

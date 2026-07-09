@@ -2,7 +2,7 @@
     <div class="space-y-6 max-[944px]:pt-14">
         <DashBoardData @dateChange="handleDateChange" />
         <DashBoardGraph :date="selectedDate" />
-        <transition v-if="auth.user?.role !== 'teacher'" name="fade-slide-up">
+        <transition v-if="featureFlags.home.enableProgress && auth.user?.role !== 'teacher'" name="fade-slide-up">
             <Progress v-if="showProgress" :data="progressData" :loading="progressLoading" :date="selectedDate"
                 @date-change="fetchProgressReport" />
         </transition>
@@ -16,6 +16,7 @@ import DashBoardGraph from '../../components/DashBoard/DashBoard-graph.vue'
 import Progress from '../../components/DashBoard/Progress.vue'
 import reportApi from '../../api/report.js'
 import { useAuthStore } from '../../stores/auth'
+import featureFlags from '../../config/featureFlags'
 
 const selectedDate = ref(new Date().toISOString().split('T')[0])
 const progressData = ref([])
@@ -25,7 +26,7 @@ const showProgress = ref(false)
 const auth = useAuthStore()
 
 async function fetchProgressReport(date) {
-    if (!date) return
+    if (!featureFlags.home.enableProgress || !date) return
     progressLoading.value = true
     try {
         const res = await reportApi.getProgressReport({ date: date })
@@ -44,13 +45,17 @@ async function fetchProgressReport(date) {
 
 const handleDateChange = (newDate) => {
     selectedDate.value = newDate
-    fetchProgressReport(newDate)
+    if (featureFlags.home.enableProgress) {
+        fetchProgressReport(newDate)
+    }
 }
 
 onMounted(() => {
-    fetchProgressReport(selectedDate.value)
+    if (featureFlags.home.enableProgress) {
+        fetchProgressReport(selectedDate.value)
+    }
     setTimeout(() => {
-        showProgress.value = true
+        showProgress.value = featureFlags.home.enableProgress
     }, 450)
 })
 </script>

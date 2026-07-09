@@ -185,37 +185,42 @@ const handleDateChange = () => {
 }
 
 const formatGradeTitle = (grade) => {
-    if (grade.includes('ม.')) {
-        return grade.replace('ม.', 'มัธยมศึกษาปีที่ ')
+    const safeGrade = typeof grade === 'string' ? grade : ''
+    if (safeGrade.includes('ม.')) {
+        return safeGrade.replace('ม.', 'มัธยมศึกษาปีที่ ')
     }
-    return grade
+    return safeGrade || '-'
 }
 
 const processedData = computed(() => {
-    return props.data.map(item => {
+    const sourceData = Array.isArray(props.data) ? props.data : []
+
+    return sourceData.filter(Boolean).map(item => {
+        const safeItem = item || {}
         let total = 0, boy = 0, girl = 0, normal = 0, late = 0, arrive = 0
 
-        const classroomsList = item.classrooms || item.rooms || []
-        const rooms = classroomsList.map(room => {
-            const roomArrive = room.arrive || 0
-            const roomTotal = room.total || 0
+        const classroomsList = safeItem.classrooms || safeItem.rooms || []
+        const rooms = (Array.isArray(classroomsList) ? classroomsList : []).filter(Boolean).map(room => {
+            const safeRoom = room || {}
+            const roomArrive = safeRoom.arrive || 0
+            const roomTotal = safeRoom.total || 0
 
             const percent = roomTotal > 0 ? Math.round((roomArrive / roomTotal) * 100) : 0
 
             total += roomTotal
-            boy += (room.boy || 0)
-            girl += (room.girl || 0)
-            normal += (room.normal || 0)
-            late += (room.late || 0)
+            boy += (safeRoom.boy || 0)
+            girl += (safeRoom.girl || 0)
+            normal += (safeRoom.normal || 0)
+            late += (safeRoom.late || 0)
             arrive += roomArrive
 
-            return { ...room, percent }
+            return { ...safeRoom, percent }
         })
 
         const gradePercent = total > 0 ? Math.round((arrive / total) * 100) : 0
 
         return {
-            grade: item.grade,
+            grade: safeItem.grade,
             total,
             boy,
             girl,
@@ -250,7 +255,7 @@ const processedData = computed(() => {
     }
 }
 
-@media (max-width: 583px) {
+@media (max-width: 1300px) {
     .text-full {
         display: none !important;
     }
@@ -258,7 +263,9 @@ const processedData = computed(() => {
     .text-short {
         display: inline !important;
     }
+}
 
+@media (max-width: 550px) {
     .col-arrival {
         display: none !important;
     }
