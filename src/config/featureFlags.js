@@ -30,6 +30,11 @@ export default {
     enableLineStatusFilter: true, // true = แสดงตัวกรองสถานะ LINE, false = ซ่อน
   },
 
+  // ฟีเจอร์สำหรับหน้า Home
+  home: {
+    enableProgress: false, // true = แสดง Progress, false = ซ่อน
+  },
+
   // ฟีเจอร์สำหรับเมนู
   menu: {
     enableUniformInspection: false, // เมนูตรวจเครื่องแบบ

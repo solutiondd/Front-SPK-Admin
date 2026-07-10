@@ -87,7 +87,7 @@ const fetchDevices = async () => {
         Swal.fire({
             icon: 'error',
             title: 'เกิดข้อผิดพลาด',
-            text: 'ไม่สามารถโหลดข้อมูลอุปกรณ์ได้',
+            text: error?.response?.data?.error || error?.message || 'ไม่สามารถโหลดข้อมูลอุปกรณ์ได้',
             confirmButtonText: 'ตรวจสอบอีกครั้ง'
         })
     }
@@ -125,7 +125,7 @@ const handleCreateSuccess = async (formData) => {
         Swal.fire({
             icon: 'error',
             title: 'เกิดข้อผิดพลาด',
-            text: 'ไม่สามารถเพิ่มอุปกรณ์ได้',
+            text: error?.response?.data?.error || error?.message || 'ไม่สามารถเพิ่มอุปกรณ์ได้',
             confirmButtonText: 'ตรวจสอบอีกครั้ง'
         })
     }
@@ -170,7 +170,7 @@ const handleUpdateSuccess = async (formData) => {
         Swal.fire({
             icon: 'error',
             title: 'เกิดข้อผิดพลาด',
-            text: 'ไม่สามารถแก้ไขอุปกรณ์ได้',
+            text: error?.response?.data?.error || error?.message || 'ไม่สามารถแก้ไขอุปกรณ์ได้',
             confirmButtonText: 'ตรวจสอบอีกครั้ง'
         })
     }
@@ -196,13 +196,13 @@ const handleDeletedSuccess = async () => {
     })
 }
 
-const handleDeleteError = async () => {
+const handleDeleteError = async (error) => {
     closeDeleteModal()
     await nextTick()
     Swal.fire({
         icon: 'error',
         title: 'เกิดข้อผิดพลาด',
-        text: 'ไม่สามารถลบอุปกรณ์ได้',
+        text: error?.response?.data?.error || error?.message || 'ไม่สามารถลบอุปกรณ์ได้',
         confirmButtonText: 'ตรวจสอบอีกครั้ง'
     })
 }

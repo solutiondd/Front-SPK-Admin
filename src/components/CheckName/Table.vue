@@ -648,7 +648,7 @@ const markPresent = async (studentId) => {
             remark: '',
         });
     } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', 'บันทึกสถานะมาเรียนไม่สำเร็จ', 'error');
+        Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error?.message || 'บันทึกสถานะมาเรียนไม่สำเร็จ', 'error');
         console.error('Auto save present error:', error);
     } finally {
         autoSaving.value = false;
@@ -726,8 +726,8 @@ const openActivityModal = async (studentId, mode = 'create') => {
         activity_date_end: mode === 'edit'
             ? (normalizeDateInput(current.activityDateEnd) || normalizeDateInput(current.activityDateStart) || defaultDate)
             : defaultDate,
-        start_time: mode === 'edit' ? (current.startTime || '') : '',
-        end_time: mode === 'edit' ? (current.endTime || '') : '',
+        start_time: mode === 'edit' ? (current.startTime || '') : '08:00:00',
+        end_time: mode === 'edit' ? (current.endTime || '') : '17:00:00',
         location: mode === 'edit' ? (current.location || '') : '',
         remark: mode === 'edit' ? (current.remark || '') : '',
     };
@@ -839,6 +839,17 @@ const setPendingPreviousActivity = (studentId, previousActivity) => {
     }
 };
 
+const formatTimeToSeconds = (timeStr) => {
+    if (!timeStr) return '';
+    if (/^\d{2}:\d{2}$/.test(timeStr)) {
+        return `${timeStr}:00`;
+    }
+    if (/^\d{2}:\d{2}:\d{2}$/.test(timeStr)) {
+        return timeStr;
+    }
+    return timeStr;
+}
+
 const createActivityRequest = async () => {
     if (autoSaving.value) return;
 
@@ -863,9 +874,19 @@ const createActivityRequest = async () => {
         return;
     }
 
+    const startTimeFormatted = formatTimeToSeconds(activityModal.value.form.start_time || '00:00');
+    const endTimeFormatted = formatTimeToSeconds(activityModal.value.form.end_time || '23:59');
+
     if (activityDateEnd < activityDateStart) {
         Swal.fire('แจ้งเตือน', 'วันสิ้นสุดกิจกรรมต้องไม่น้อยกว่าวันเริ่มกิจกรรม', 'warning');
         return;
+    }
+
+    if (activityDateStart === activityDateEnd) {
+        if (endTimeFormatted <= startTimeFormatted) {
+            Swal.fire('แจ้งเตือน', 'เวลาสิ้นสุดต้องมากกว่าเวลาเริ่มต้นเสมอสำหรับกิจกรรมในวันเดียวกัน', 'warning');
+            return;
+        }
     }
 
     autoSaving.value = true;
@@ -874,8 +895,8 @@ const createActivityRequest = async () => {
             activity_name: activityModal.value.form.activity_name,
             activity_date_start: activityDateStart,
             activity_date_end: activityDateEnd,
-            start_time: activityModal.value.form.start_time || '',
-            end_time: activityModal.value.form.end_time || '',
+            start_time: startTimeFormatted,
+            end_time: endTimeFormatted,
             location: activityModal.value.form.location || '',
             status: 'เข้าร่วม',
             remark: activityModal.value.form.remark || '',
@@ -905,8 +926,8 @@ const createActivityRequest = async () => {
                     activityName: activityModal.value.form.activity_name,
                     activityDateStart,
                     activityDateEnd,
-                    startTime: activityModal.value.form.start_time || '',
-                    endTime: activityModal.value.form.end_time || '',
+                    startTime: startTimeFormatted,
+                    endTime: endTimeFormatted,
                     location: activityModal.value.form.location || '',
                     remark: activityModal.value.form.remark || '',
                 }
@@ -927,8 +948,8 @@ const createActivityRequest = async () => {
                 activityName: activityModal.value.form.activity_name,
                 activityDateStart: activityDateStart,
                 activityDateEnd: activityDateEnd,
-                startTime: activityModal.value.form.start_time || '',
-                endTime: activityModal.value.form.end_time || '',
+                startTime: startTimeFormatted,
+                endTime: endTimeFormatted,
                 location: activityModal.value.form.location || '',
                 remark: activityModal.value.form.remark || '',
             };
@@ -984,7 +1005,7 @@ const deletePendingActivity = async (studentId) => {
         emit('update:pendingLeaveApprovals', localPendingLeaveApprovals.value);
         Swal.fire('สำเร็จ', 'ลบกิจกรรมเรียบร้อยแล้ว', 'success');
     } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', 'ลบกิจกรรมไม่สำเร็จ', 'error');
+        Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error?.message || 'ลบกิจกรรมไม่สำเร็จ', 'error');
         console.error('Delete pending activity error:', error);
     } finally {
         autoSaving.value = false;
@@ -1019,7 +1040,7 @@ const deleteActivity = async (studentId) => {
         emit('update:attendanceData', localAttendanceData.value);
         Swal.fire('สำเร็จ', 'ลบกิจกรรมเรียบร้อยแล้ว', 'success');
     } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', 'ลบกิจกรรมไม่สำเร็จ', 'error');
+        Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error?.message || 'ลบกิจกรรมไม่สำเร็จ', 'error');
         console.error('Delete activity error:', error);
     } finally {
         autoSaving.value = false;
@@ -1186,7 +1207,7 @@ const approveLeave = async (studentId) => {
         emit('update:pendingLeaveApprovals', localPendingLeaveApprovals.value);
         Swal.fire('สำเร็จ', 'อนุมัติการลาแล้ว', 'success');
     } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', 'บันทึกการอนุมัติลาไม่สำเร็จ', 'error');
+        Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error?.message || 'บันทึกการอนุมัติลาไม่สำเร็จ', 'error');
         console.error('Approve leave error:', error);
     } finally {
         autoSaving.value = false;
@@ -1215,7 +1236,7 @@ const rejectLeave = async (studentId) => {
         emit('update:pendingLeaveApprovals', localPendingLeaveApprovals.value);
         Swal.fire('สำเร็จ', 'ไม่อนุมัติการลา', 'success');
     } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', 'บันทึกการไม่อนุมัติลาไม่สำเร็จ', 'error');
+        Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error?.message || 'บันทึกการไม่อนุมัติลาไม่สำเร็จ', 'error');
         console.error('Reject leave error:', error);
     } finally {
         autoSaving.value = false;
@@ -1244,7 +1265,7 @@ const cancelLeave = async (studentId) => {
         emit('update:pendingLeaveApprovals', localPendingLeaveApprovals.value);
         Swal.fire('สำเร็จ', 'ยกเลิกรายการลาแล้ว', 'success');
     } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', 'ยกเลิกรายการลาไม่สำเร็จ', 'error');
+        Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error?.message || 'ยกเลิกรายการลาไม่สำเร็จ', 'error');
         console.error('Cancel leave error:', error);
     } finally {
         autoSaving.value = false;

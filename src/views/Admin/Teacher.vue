@@ -243,7 +243,7 @@ const fetchTeachers = async () => {
         Swal.fire({
             icon: 'error',
             title: 'เกิดข้อผิดพลาด',
-            text: 'ไม่สามารถโหลดข้อมูลอาจารย์ได้',
+            text: error?.response?.data?.error || error?.message || 'ไม่สามารถโหลดข้อมูลอาจารย์ได้',
             confirmButtonColor: '#2563eb',
             didOpen: () => {
                 document.getElementById('app').removeAttribute('aria-hidden')
@@ -348,13 +348,13 @@ const handleCreateSuccess = async (formData) => {
         Swal.fire({
             icon: 'error',
             title: 'เกิดข้อผิดพลาด',
-            text: 'ไม่สามารถเพิ่มอาจารย์ได้',
+            text: error?.response?.data?.error || error?.message || 'ไม่สามารถเพิ่มอาจารย์ได้',
             confirmButtonColor: '#2563eb',
             didOpen: () => {
                 document.getElementById('app').removeAttribute('aria-hidden')
             }
         })
-        if (onError) onError('other')
+        if (onError) onError(error)
     }
 }
 

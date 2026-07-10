@@ -479,12 +479,13 @@ const handleSubmit = async () => {
             if (errStr.includes('duplicatestudentuserid')) {
                 useridError.value = 'มีรหัสนี้แล้ว กรุณาใช้รหัสอื่น'
             } else {
+                const errorMessage = err?.response?.data?.error || err?.message || 'ไม่สามารถเพิ่มนักเรียนได้';
                 closeModal();
                 const { default: Swal } = await import('sweetalert2');
                 Swal.fire({
                     icon: 'error',
                     title: 'เกิดข้อผิดพลาด',
-                    text: 'ไม่สามารถเพิ่มนักเรียนได้',
+                    text: errorMessage,
                     confirmButtonColor: '#2563eb',
                     didOpen: () => {
                         document.getElementById('app')?.removeAttribute('aria-hidden')

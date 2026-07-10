@@ -114,7 +114,7 @@
             </div>
         </div>
 
-        <StudentTable :students="filteredStudents" :loading="loading" :currentPage="currentPage"
+        <StudentTable class="relative z-10" :students="filteredStudents" :loading="loading" :currentPage="currentPage"
             :itemsPerPage="itemsPerPage.value" @edit="openUpdateModal" @delete="openDeleteModal"
             @reset="openRePasswordModal" @detail="openDetailModal" @refresh="fetchStudents" />
         <CreateModal ref="createModalRef" :classrooms="classrooms" @success="handleCreateSuccess" />
@@ -364,12 +364,12 @@ const fetchStudents = async () => {
         const isSearching = !!searchUserid.value.trim()
 
         const response = await studentService.getStudents(
-    (useEmptyGradeClassroom || isSearching) ? '' : selectedGrade.value,
-    (useEmptyGradeClassroom || isSearching) ? '' : selectedClassroom.value,
-    userid,
-    name,
-    effectiveLineConnectFilter
-)
+            (useEmptyGradeClassroom || isSearching) ? '' : selectedGrade.value,
+            (useEmptyGradeClassroom || isSearching) ? '' : selectedClassroom.value,
+            userid,
+            name,
+            effectiveLineConnectFilter
+        )
         if (response.message === 'Success' && response.data) {
             students.value = response.data.map(mapStudentRow)
             if (response.data.length > 0) {
@@ -386,7 +386,7 @@ const fetchStudents = async () => {
         Swal.fire({
             icon: 'error',
             title: 'เกิดข้อผิดพลาด',
-            text: 'ไม่สามารถโหลดข้อมูลนักเรียนได้',
+            text: error?.response?.data?.error || error?.message || 'ไม่สามารถโหลดข้อมูลนักเรียนได้',
             confirmButtonColor: '#2563eb',
             didOpen: () => {
                 document.getElementById('app').removeAttribute('aria-hidden')
@@ -458,13 +458,13 @@ const handleCreateSuccess = async (formData) => {
         Swal.fire({
             icon: 'error',
             title: 'เกิดข้อผิดพลาด',
-            text: 'ไม่สามารถเพิ่มนักเรียนได้',
+            text: error?.response?.data?.error || error?.message || 'ไม่สามารถเพิ่มนักเรียนได้',
             confirmButtonColor: '#2563eb',
             didOpen: () => {
                 document.getElementById('app')?.removeAttribute('aria-hidden')
             }
         })
-        if (onError) onError('other')
+        if (onError) onError(error)
     } finally {
         loading.value = false
     }

@@ -345,7 +345,7 @@ import { AllowanceService } from '../../api/allowance'
 const auth = useAuthStore()
 const emit = defineEmits(['dateChange'])
 const studentCardRef = ref(null)
-const selectedDate = ref(new Date().toISOString().split('T')[0])
+const selectedDate = ref(new Date().toLocaleDateString('sv-SE'))
 const allowanceRules = ref([]);
 
 function getDefaultDate() {
@@ -396,6 +396,7 @@ const missedTotalItems = ref(0)
 const missedTotalPages = ref(0)
 const missedRole = ref('student')
 const classrooms = ref([])
+// const progressData = ref([])
 const studentLeave = ref(0)
 const teacherLeave = ref(0)
 const studentActivity = ref(0)
@@ -918,6 +919,20 @@ const fetchAllowanceSettings = async () => {
     }
 };
 
+// async function fetchProgressData() {
+//     try {
+//         const res = await reportApi.getProgressReport({ date: selectedDate.value })
+//         if (res && res.message === 'Success') {
+//             progressData.value = res.data || []
+//         } else {
+//             progressData.value = []
+//         }
+//     } catch (e) {
+//         console.error('Error fetching progress report on dashboard:', e)
+//         progressData.value = []
+//     }
+// }
+
 onMounted(() => {
     showStudentStat.value = false
     showTeacherStat.value = false
@@ -996,23 +1011,23 @@ onMounted(() => {
         containerEl3.addEventListener('mouseleave', stopAnim3)
     }
 
-    if (studentLateIconRef.value) {
-        const animLate = lottie.loadAnimation({
-            container: studentLateIconRef.value,
-            renderer: 'svg',
-            loop: true,
-            autoplay: false,
-            path: new URL('../../assets/doodle-color-292-clock-time-hover-pinch.json', import.meta.url).href,
-        })
-        animLate.addEventListener('DOMLoaded', () => {
-            animLate.goToAndStop(0, true)
-        })
-        const containerLate = studentCardRef.value || studentLateStatRef.value || studentLateIconRef.value
-        const playLate = () => animLate.play()
-        const stopLate = () => animLate.stop()
-        containerLate.addEventListener('mouseenter', playLate)
-        containerLate.addEventListener('mouseleave', stopLate)
-    }
+    // if (studentLateIconRef.value) {
+    //     const animLate = lottie.loadAnimation({
+    //         container: studentLateIconRef.value,
+    //         renderer: 'svg',
+    //         loop: true,
+    //         autoplay: false,
+    //         path: new URL('../../assets/doodle-color-292-clock-time-hover-pinch.json', import.meta.url).href,
+    //     })
+    //     animLate.addEventListener('DOMLoaded', () => {
+    //         animLate.goToAndStop(0, true)
+    //     })
+    //     const containerLate = studentCardRef.value || studentLateStatRef.value || studentLateIconRef.value
+    //     const playLate = () => animLate.play()
+    //     const stopLate = () => animLate.stop()
+    //     containerLate.addEventListener('mouseenter', playLate)
+    //     containerLate.addEventListener('mouseleave', stopLate)
+    // }
 })
 </script>
 
