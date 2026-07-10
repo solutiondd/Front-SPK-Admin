@@ -67,7 +67,8 @@
                                 <td class="text-center">
                                     <span v-if="getEntry(item.late_dates[0]) !== '-'"
                                         class="badge badge-warning badge-md px-4 py-2">{{
-                                            computeLateTime(getEntry(item.late_dates[0]), item.role) }}</span>
+                                            computeLateTime(getEntry(item.late_dates[0]), item.role, item.position)
+                                        }}</span>
                                     <span v-else class="badge badge-warning badge-md px-4 py-2">-</span>
                                 </td>
                                 <td class="text-center">
@@ -90,7 +91,7 @@
                                                     <div
                                                         class="bg-neutral text-neutral-content w-14 h-14 rounded flex items-center justify-center">
                                                         <span class="text-base font-bold">{{ getInitials(item.name)
-                                                        }}</span>
+                                                            }}</span>
                                                     </div>
                                                 </div>
                                             </template>
@@ -116,7 +117,7 @@
                                     <td class="text-center">
                                         <span v-if="getEntry(late) !== '-'"
                                             class="badge badge-warning badge-md px-4 py-2">{{
-                                                computeLateTime(getEntry(late), item.role) }}</span>
+                                                computeLateTime(getEntry(late), item.role, item.position) }}</span>
                                         <span v-else class="badge badge-warning badge-md px-4 py-2">-</span>
                                     </td>
                                     <td class="text-center">
@@ -138,7 +139,7 @@
                                                         <div
                                                             class="bg-neutral text-neutral-content w-14 h-14 rounded flex items-center justify-center">
                                                             <span class="text-base font-bold">{{ getInitials(item.name)
-                                                                }}</span>
+                                                            }}</span>
                                                         </div>
                                                     </div>
                                                 </template>
@@ -231,7 +232,7 @@
                             <div class="flex-1 text-center">
                                 <span class="text-xs text-base-content/60 block">เวลาสาย</span>
                                 <span class="badge badge-warning badge-sm" v-if="getEntry(late) !== '-'">{{
-                                    computeLateTime(getEntry(late), item.role) }}</span>
+                                    computeLateTime(getEntry(late), item.role, item.position) }}</span>
                                 <span class="badge badge-error badge-sm" v-else>-</span>
                             </div>
                         </div>
@@ -359,7 +360,7 @@ async function exportLateToExcel() {
                             : (item.department || '-'),
                         'วันที่': formatDate(late.date),
                         'เวลาเข้า': getFirstTime(late),
-                        'มาสาย(ชม.)': computeLateTime(getFirstTimeFull(late), item.role),
+                        'มาสาย(ชม.)': computeLateTime(getFirstTimeFull(late), item.role, item.position),
                     });
                 });
             } else {
@@ -546,18 +547,30 @@ function viewImage(image, isProfile = false) {
     imageModal.value?.showModal()
 }
 
-const computeLateTime = (timeStr, role) => {
+const normalizeRole = (role) => {
+    const normalized = String(role || '').trim().toLowerCase();
+    if (!normalized) return '';
+    if (normalized === 'student' || normalized === 'teacher') return normalized;
+    if (normalized.includes('นักเรียน')) return 'student';
+    if (normalized.includes('ครู')) return 'teacher';
+    return '';
+};
+
+const computeLateTime = (timeStr, role, position) => {
     if (!timeStr || timeStr === '-' || timeStr === 'ไม่มีเข้า') return '-';
 
     let h1 = 8;
     let m1 = 1;
     let s1 = 0;
 
+    const targetRole =
+        normalizeRole(role) ||
+        normalizeRole(position) ||
+        normalizeRole(props.filters?.role) ||
+        'student';
+
     if (props.allowanceRules && props.allowanceRules.length > 0) {
-        const currentRule = props.allowanceRules.find(r => {
-            const targetRole = role || (props.grade ? 'student' : 'teacher');
-            return r.role === targetRole && r.enabled;
-        });
+        const currentRule = props.allowanceRules.find(r => r.role === targetRole && r.enabled);
         if (currentRule && currentRule.allowance_time) {
             const [allowH, allowM, allowS] = currentRule.allowance_time.split(':').map(Number);
             h1 = allowH;
