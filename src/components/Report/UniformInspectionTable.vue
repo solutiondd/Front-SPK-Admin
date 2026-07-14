@@ -28,16 +28,26 @@
                         <td class="text-center max-[509px]:hidden">{{ item.summary?.pass ?? 0 }}</td>
                         <td class="text-center max-[509px]:hidden">{{ item.summary?.not_pass ?? 0 }}</td>
                         <td class="text-center">
-                            <button @click="openDetail(item)" class="bg-transparent border-none shadow-none p-0"
-                                title="ดูรายละเอียดเพิ่มเติม">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                    stroke="#3b82f6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                            </button>
+                            <div class="flex items-center justify-center gap-2">
+                                <button @click="openDetail(item)" class="bg-transparent border-none shadow-none p-0"
+                                    title="ดูรายละเอียดเพิ่มเติม">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="#3b82f6">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
+                                <button @click="openDelete(item)" class="bg-transparent border-none shadow-none p-0"
+                                    v-if="canDeleteUniformInspection" title="ลบรายการ">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="#ef4444">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     <tr v-if="!sortedRows.length">
@@ -67,6 +77,7 @@
         </div>
 
         <UniformInspectionDetail ref="detailRef" />
+        <UniformInspectionDelete v-if="canDeleteUniformInspection" ref="deleteRef" @success="loadData" />
     </div>
 </template>
 
@@ -74,6 +85,8 @@
 import { computed, ref, watch } from 'vue';
 import { UniformInspectionService } from '../../api/uniform_inspection';
 import UniformInspectionDetail from './UniformInspectionDetail.vue';
+import UniformInspectionDelete from './UniformInspectionDelete.vue';
+import featureFlags from '../../config/featureFlags';
 import { getGradeSortOrder, mapGradeDisplay } from '../../utils/gradeSystem';
 
 const props = defineProps({
@@ -91,8 +104,10 @@ const props = defineProps({
 
 const uniformInspectionService = new UniformInspectionService();
 const detailRef = ref(null);
+const deleteRef = ref(null);
 const loading = ref(false);
 const rows = ref([]);
+const canDeleteUniformInspection = featureFlags.reportUniformInspection?.enableDelete ?? true;
 const pagination = ref({
     page: 1,
     limit: 50,
@@ -168,6 +183,10 @@ const loadData = async () => {
 
 const openDetail = (item) => {
     detailRef.value?.openModal(item?._id);
+};
+
+const openDelete = (item) => {
+    deleteRef.value?.open(item);
 };
 
 const changePage = async (page) => {
