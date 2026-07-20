@@ -75,27 +75,47 @@
                                         <button type="button" :disabled="autoSaving"
                                             class="max-[444px]:text-xs max-[444px]:px-2"
                                             @click.stop.prevent="markPresent(student._id)">
-                                            ตั้งเป็นมาเรียน
+                                            <svg class="w-4 h-4 max-[444px]:w-3.5 max-[444px]:h-3.5 text-success"
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            มาเรียน
                                         </button>
                                     </li>
                                     <li>
                                         <button type="button" :disabled="autoSaving"
                                             class="max-[444px]:text-xs max-[444px]:px-2"
                                             @click.stop.prevent="openLeaveModal(student._id, 'draft-edit')">
-                                            ตั้งเป็นลา
+                                            <svg class="w-4 h-4 max-[444px]:w-3.5 max-[444px]:h-3.5 text-warning"
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            ลา
                                         </button>
                                     </li>
                                     <li>
                                         <button type="button" :disabled="autoSaving"
                                             class="max-[444px]:text-xs max-[444px]:px-2"
                                             @click.stop.prevent="openActivityModal(student._id, 'draft-edit')">
-                                            ตั้งเป็นกิจกรรม
+                                            <svg class="w-4 h-4 max-[444px]:w-3.5 max-[444px]:h-3.5 text-info"
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 5l7 7-7 7"></path>
+                                            </svg>
+                                            กิจกรรม
                                         </button>
                                     </li>
                                     <li>
                                         <button type="button" :disabled="autoSaving"
                                             class="max-[444px]:text-xs max-[444px]:px-2 text-error"
                                             @click.stop.prevent="removeDraftChange(student._id)">
+                                            <svg class="w-4 h-4 max-[444px]:w-3.5 max-[444px]:h-3.5" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
                                             ยกเลิกรายการที่เลือก
                                         </button>
                                     </li>
