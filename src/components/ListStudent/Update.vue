@@ -49,7 +49,7 @@
                         <input v-model="formData.userid" type="text" class="input input-bordered" required
                             :class="{ 'input-error': useridError }" autocomplete="off" />
                         <label v-if="useridError" class="label"><span class="label-text-alt text-error">{{ useridError
-                        }}</span></label>
+                                }}</span></label>
                     </div>
 
                     <div class="form-control">
@@ -105,7 +105,7 @@
                         <input v-model="formData.rfid" type="text" class="input input-bordered" @input="validateRfid"
                             autocomplete="off" />
                         <label v-if="rfidError" class="label"><span class="label-text-alt text-error">{{ rfidError
-                        }}</span></label>
+                                }}</span></label>
                     </div>
 
                     <div class="form-control">
@@ -117,6 +117,13 @@
                         <label v-if="guardianPhoneError" class="label"><span class="label-text-alt text-error">{{
                             guardianPhoneError
                                 }}</span></label>
+                    </div>
+
+                    <div class="form-control w-full md:col-span-2">
+                        <label class="label cursor-pointer justify-start gap-3">
+                            <input type="checkbox" v-model="formData.no_use_face" class="checkbox checkbox-primary" />
+                            <span class="label-text">ไม่ใช้สแกนใบหน้า</span>
+                        </label>
                     </div>
 
                 </div>
@@ -168,7 +175,8 @@ const formData = ref({
     classroom: '',
     picture: null,
     rfid: '',
-    guardian_phone: ''
+    guardian_phone: '',
+    no_use_face: false
 })
 
 const props = defineProps({
@@ -267,7 +275,8 @@ const openModal = async (student) => {
         rfid: student.rfid !== undefined && student.rfid !== null ? String(student.rfid) : '',
         guardian_phone: student.guardian_phone !== undefined && student.guardian_phone !== null
             ? String(student.guardian_phone)
-            : ''
+            : '',
+        no_use_face: Boolean(student.no_use_face === true || student.no_use_face === 'true')
     }
     currentImage.value = getPictureUrl(student.picture) || ''
     previewImage.value = ''

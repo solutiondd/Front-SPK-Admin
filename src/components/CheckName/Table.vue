@@ -1,6 +1,6 @@
 <template>
     <div class="w-full space-y-4">
-        <div class="flex items-center justify-end">
+        <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
                 <label class="text-sm text-gray-700">รายการ:</label>
                 <select v-model.number="pageSize" class="select select-sm select-bordered w-18"
@@ -11,6 +11,19 @@
                     <option :value="50">50</option>
                 </select>
                 <span class="text-sm text-gray-700">ต่อหน้า</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <!-- <span v-if="draftCount > 0" class="badge badge-warning badge-sm">
+                    รอการบันทึก {{ draftCount }} รายการ
+                </span> -->
+                <button type="button" class="btn btn-sm" :disabled="draftCount === 0 || autoSaving"
+                    @click="clearAllDraftChanges">
+                    ล้างที่เลือก
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" :disabled="draftCount === 0 || autoSaving"
+                    @click="saveAllDraftChanges">
+                    บันทึกทั้งหมด
+                </button>
             </div>
         </div>
 
@@ -41,7 +54,46 @@
                             </div>
                         </td>
                         <td class="text-center align-middle max-[444px]:px-1">
-                            <div v-if="localPendingLeaveApprovals[student._id]"
+                            <div v-if="isDraftChange(student._id)" class="dropdown dropdown-center">
+                                <button type="button" tabindex="0"
+                                    class="btn btn-sm max-[444px]:btn-xs btn-ghost w-full justify-center border-0 shadow-none bg-transparent hover:bg-base-200 max-[444px]:min-h-7 max-[444px]:h-7 max-[444px]:px-1">
+                                    <span :class="['badge max-[444px]:badge-xs', getDraftBadgeClass(student._id)]">
+                                        {{ getDraftLabel(student._id) }}
+                                    </span>
+                                </button>
+                                <ul tabindex="0"
+                                    class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 max-[444px]:w-36 max-[444px]:right-0 max-[444px]:left-auto">
+                                    <li>
+                                        <button type="button" :disabled="autoSaving"
+                                            class="max-[444px]:text-xs max-[444px]:px-2"
+                                            @click.stop.prevent="markPresent(student._id)">
+                                            ตั้งเป็นมาเรียน
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" :disabled="autoSaving"
+                                            class="max-[444px]:text-xs max-[444px]:px-2"
+                                            @click.stop.prevent="openLeaveModal(student._id, 'draft-edit')">
+                                            ตั้งเป็นลา
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" :disabled="autoSaving"
+                                            class="max-[444px]:text-xs max-[444px]:px-2"
+                                            @click.stop.prevent="openActivityModal(student._id, 'draft-edit')">
+                                            ตั้งเป็นกิจกรรม
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" :disabled="autoSaving"
+                                            class="max-[444px]:text-xs max-[444px]:px-2 text-error"
+                                            @click.stop.prevent="removeDraftChange(student._id)">
+                                            ยกเลิกรายการที่เลือก
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div v-else-if="localPendingLeaveApprovals[student._id]"
                                 class="flex flex-col items-center gap-1">
                                 <div class="dropdown dropdown-center">
                                     <button type="button" tabindex="0"
@@ -459,6 +511,8 @@ const props = defineProps({
     students: Array,
     selectedDate: String,
     selectedGrade: String,
+    selectedClassroom: String,
+    selectedDepartment: String,
     loading: Boolean,
     attendanceData: Object,
     pendingLeaveApprovals: Object,
@@ -513,13 +567,179 @@ const handlePageSizeChange = () => {
     currentPage.value = 1;
 };
 
-const emit = defineEmits(['update:attendanceData', 'update:pendingLeaveApprovals']);
+const emit = defineEmits(['update:attendanceData', 'update:pendingLeaveApprovals', 'request:reload']);
 
 const imgBaseUrl = ref(import.meta.env.VITE_APP_IMG_URL);
 const autoSaving = ref(false);
 const localAttendanceData = ref({});
 const localPendingLeaveApprovals = ref({});
 const leaveTypes = ref([]);
+const draftChanges = ref({});
+
+const DRAFT_STORAGE_PREFIX = 'checkname-draft-queue-v1';
+const draftStorageKey = computed(() => {
+    const role = props.selectedRole || 'student';
+    const date = props.selectedDate || '';
+    const grade = props.selectedGrade || '';
+    const classroom = props.selectedClassroom || '';
+    const department = props.selectedDepartment || '';
+    return `${DRAFT_STORAGE_PREFIX}:${role}:${date}:${grade}:${classroom}:${department}`;
+});
+
+const draftCount = computed(() => Object.keys(draftChanges.value || {}).length);
+
+const saveDraftsToStorage = () => {
+    try {
+        const hasDraft = draftCount.value > 0;
+        if (!hasDraft) {
+            localStorage.removeItem(draftStorageKey.value);
+            return;
+        }
+        localStorage.setItem(draftStorageKey.value, JSON.stringify(draftChanges.value));
+    } catch (error) {
+        console.error('Save draft changes error:', error);
+    }
+};
+
+const loadDraftsFromStorage = () => {
+    try {
+        const raw = localStorage.getItem(draftStorageKey.value);
+        if (!raw) {
+            draftChanges.value = {};
+            return;
+        }
+        const parsed = JSON.parse(raw);
+        draftChanges.value = parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (error) {
+        console.error('Load draft changes error:', error);
+        draftChanges.value = {};
+    }
+};
+
+const pickLeavePreviousActivity = (source) => {
+    if (!source) return null;
+    return {
+        activityId: source.activityId || null,
+        activityName: source.activityName || '',
+        activityDateStart: source.activityDateStart || '',
+        activityDateEnd: source.activityDateEnd || '',
+        startTime: source.startTime || '',
+        endTime: source.endTime || '',
+        location: source.location || '',
+        remark: source.remark || '',
+    };
+};
+
+const sanitizeBaseAttendance = (source) => {
+    const next = {};
+    Object.entries(source || {}).forEach(([studentId, value]) => {
+        if (!studentId || !value) return;
+        const leaveStatus = String(value?.leaveStatus || '').toLowerCase();
+        if (value?.isDraft || leaveStatus === 'draft') return;
+        next[studentId] = value;
+    });
+    return next;
+};
+
+const applyDraftChangesToLocalState = () => {
+    const nextAttendance = sanitizeBaseAttendance(props.attendanceData);
+    const nextPending = { ...(props.pendingLeaveApprovals || {}) };
+
+    Object.entries(draftChanges.value || {}).forEach(([studentId, change]) => {
+        if (!studentId || !change) return;
+
+        if (change.action === 'present') {
+            nextAttendance[studentId] = {
+                status: 'present',
+                leaveType: null,
+                remark: '',
+                isDraft: true,
+            };
+            delete nextPending[studentId];
+            return;
+        }
+
+        if (change.action === 'leave') {
+            nextAttendance[studentId] = {
+                status: 'leave',
+                leaveType: change.leaveTypeName || '',
+                leaveTypeId: change.leaveTypeId || '',
+                remark: change.reason || '',
+                leaveRequestId: change.requestId || null,
+                leaveStatus: 'draft',
+                previousActivity: pickLeavePreviousActivity(change.previousActivity),
+                isDraft: true,
+            };
+            delete nextPending[studentId];
+            return;
+        }
+
+        if (change.action === 'activity') {
+            nextAttendance[studentId] = {
+                status: 'activity',
+                activityId: change.activityId || null,
+                activityName: change.activityName || 'มีกิจกรรม',
+                activityDateStart: change.activityDateStart || '',
+                activityDateEnd: change.activityDateEnd || '',
+                startTime: change.startTime || '',
+                endTime: change.endTime || '',
+                location: change.location || '',
+                remark: change.remark || '',
+                isDraft: true,
+            };
+            delete nextPending[studentId];
+        }
+    });
+
+    localAttendanceData.value = nextAttendance;
+    localPendingLeaveApprovals.value = nextPending;
+};
+
+const upsertDraftChange = (studentId, change) => {
+    if (!studentId || !change) return;
+    draftChanges.value = {
+        ...(draftChanges.value || {}),
+        [studentId]: {
+            ...change,
+            updatedAt: Date.now(),
+        },
+    };
+    saveDraftsToStorage();
+    applyDraftChangesToLocalState();
+};
+
+const removeDraftChange = (studentId) => {
+    if (!draftChanges.value?.[studentId]) return;
+    const next = { ...(draftChanges.value || {}) };
+    delete next[studentId];
+    draftChanges.value = next;
+    saveDraftsToStorage();
+    applyDraftChangesToLocalState();
+};
+
+const clearAllDraftChanges = () => {
+    draftChanges.value = {};
+    saveDraftsToStorage();
+    applyDraftChangesToLocalState();
+};
+
+const isDraftChange = (studentId) => Boolean(draftChanges.value?.[studentId]);
+const getDraftChange = (studentId) => draftChanges.value?.[studentId] || null;
+const getDraftLabel = (studentId) => {
+    const action = getDraftChange(studentId)?.action;
+    if (action === 'present') return 'มา';
+    if (action === 'leave') return 'ลา';
+    if (action === 'activity') return 'กิจกรรม';
+    return 'รอบันทึก';
+};
+
+const getDraftBadgeClass = (studentId) => {
+    const action = getDraftChange(studentId)?.action;
+    if (action === 'present') return 'badge-success';
+    if (action === 'leave') return 'badge-warning';
+    if (action === 'activity') return 'badge-info';
+    return 'badge-ghost';
+};
 
 const leaveModal = ref({
     show: false,
@@ -552,13 +772,18 @@ const activityModal = ref({
     },
 });
 
-watch(() => props.attendanceData, (newVal) => {
-    localAttendanceData.value = { ...newVal };
+watch(() => props.attendanceData, () => {
+    applyDraftChangesToLocalState();
 }, { deep: true });
 
-watch(() => props.pendingLeaveApprovals, (newVal) => {
-    localPendingLeaveApprovals.value = { ...newVal };
+watch(() => props.pendingLeaveApprovals, () => {
+    applyDraftChangesToLocalState();
 }, { deep: true });
+
+watch(draftStorageKey, () => {
+    loadDraftsFromStorage();
+    applyDraftChangesToLocalState();
+}, { immediate: true });
 
 const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
 const formatThaiDate = (dateStr) => {
@@ -590,8 +815,15 @@ const displayAttendanceStatus = (studentId) => {
     return '';
 };
 
-const toTimeNow = () => {
+const toAttendanceSubmitTime = () => {
     const now = new Date();
+    const eightAM = new Date(now);
+    eightAM.setHours(8, 0, 0, 0);
+
+    if (now > eightAM) {
+        return '08:00:00';
+    }
+
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
     const ss = String(now.getSeconds()).padStart(2, '0');
@@ -615,6 +847,13 @@ const getLeaveTypeIdByName = (name) => {
     return leaveTypes.value.find(type => String(type?.name || '').trim().toLowerCase() === target)?._id || '';
 };
 
+const normalizeTimeInput = (value) => {
+    if (!value) return '';
+    if (/^\d{2}:\d{2}:\d{2}$/.test(value)) return value;
+    if (/^\d{2}:\d{2}$/.test(value)) return `${value}:00`;
+    return value;
+};
+
 const loadLeaveTypes = async () => {
     try {
         const response = await leaveService.getLeaveTypes();
@@ -627,42 +866,33 @@ const loadLeaveTypes = async () => {
 
 const markPresent = async (studentId) => {
     if (autoSaving.value) return;
-    localAttendanceData.value[studentId] = {
-        status: 'present',
-        leaveType: null,
-        remark: '',
-    };
-    emit('update:attendanceData', localAttendanceData.value);
-
     if (!props.selectedDate) {
         Swal.fire('แจ้งเตือน', 'กรุณาเลือกวันที่ก่อน', 'warning');
         return;
     }
 
-    autoSaving.value = true;
-    try {
-        await leaveService.manualAttendance({
-            user_id: studentId,
-            date: props.selectedDate,
-            time: toTimeNow(),
-            remark: '',
-        });
-    } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', error?.response?.data?.error || error?.message || 'บันทึกสถานะมาเรียนไม่สำเร็จ', 'error');
-        console.error('Auto save present error:', error);
-    } finally {
-        autoSaving.value = false;
-    }
+    upsertDraftChange(studentId, {
+        action: 'present',
+    });
 };
 
 const openLeaveModal = async (studentId, mode = 'create') => {
     const pending = localPendingLeaveApprovals.value[studentId] || {};
     const attendance = localAttendanceData.value[studentId] || {};
+    const draft = getDraftChange(studentId);
+    const useDraft = mode === 'draft-edit' && draft?.action === 'leave';
+
+    const draftLeaveTypeName = useDraft ? draft.leaveTypeName : '';
+    const draftFallbackLeaveTypeId = draftLeaveTypeName
+        ? getLeaveTypeIdByName(draftLeaveTypeName)
+        : '';
 
     const fallbackLeaveTypeId = allowedLeaveTypes.value[0]?._id || '';
-    const leaveType = mode === 'edit'
-        ? (pending.leaveTypeId || attendance.leaveTypeId || getLeaveTypeIdByName(pending.leaveType || attendance.leaveType) || fallbackLeaveTypeId)
-        : fallbackLeaveTypeId;
+    const leaveType = useDraft
+        ? (draft.leaveTypeId || draftFallbackLeaveTypeId || fallbackLeaveTypeId)
+        : mode === 'edit'
+            ? (pending.leaveTypeId || attendance.leaveTypeId || getLeaveTypeIdByName(pending.leaveType || attendance.leaveType) || fallbackLeaveTypeId)
+            : fallbackLeaveTypeId;
 
     const selectedLeaveTypeId = allowedLeaveTypes.value.some((type) => type._id === leaveType)
         ? leaveType
@@ -670,21 +900,29 @@ const openLeaveModal = async (studentId, mode = 'create') => {
 
     leaveModal.value.studentId = studentId;
     leaveModal.value.mode = mode;
-    leaveModal.value.requestId = mode === 'edit' ? (pending.requestId || attendance.leaveRequestId || null) : null;
+    leaveModal.value.requestId = useDraft
+        ? (draft.requestId || null)
+        : mode === 'edit'
+            ? (pending.requestId || attendance.leaveRequestId || null)
+            : null;
     const defaultDate = props.selectedDate || '';
-    const startDate = mode === 'edit'
-        ? (pending.startDate || pending.leaveDate || defaultDate)
-        : defaultDate;
-    const endDate = mode === 'edit'
-        ? (pending.endDate || pending.leaveDate || defaultDate)
-        : defaultDate;
+    const startDate = useDraft
+        ? (draft.startDate || defaultDate)
+        : mode === 'edit'
+            ? (pending.startDate || pending.leaveDate || defaultDate)
+            : defaultDate;
+    const endDate = useDraft
+        ? (draft.endDate || draft.startDate || defaultDate)
+        : mode === 'edit'
+            ? (pending.endDate || pending.leaveDate || defaultDate)
+            : defaultDate;
     leaveModal.value.form = {
         leaveStartDate: startDate,
         leaveEndDate: endDate,
         leaveType: selectedLeaveTypeId,
-        startTime: mode === 'edit' ? (pending.startTime || '') : '',
-        endTime: mode === 'edit' ? (pending.endTime || '') : '',
-        reason: mode === 'edit' ? (pending.reason || attendance.remark || '') : '',
+        startTime: useDraft ? (draft.startTime || '') : mode === 'edit' ? (pending.startTime || '') : '',
+        endTime: useDraft ? (draft.endTime || '') : mode === 'edit' ? (pending.endTime || '') : '',
+        reason: useDraft ? (draft.reason || '') : mode === 'edit' ? (pending.reason || attendance.remark || '') : '',
     };
     await nextTick();
     leaveModal.value.show = true;
@@ -714,22 +952,46 @@ const openActivityModal = async (studentId, mode = 'create') => {
     const current = mode === 'edit'
         ? (getCurrentActivitySnapshot(studentId) || localAttendanceData.value[studentId] || {})
         : (localAttendanceData.value[studentId] || {});
+    const draft = getDraftChange(studentId);
+    const useDraft = mode === 'draft-edit' && draft?.action === 'activity';
+
+    const draftCurrent = useDraft
+        ? {
+            activityId: draft.activityId || null,
+            activityName: draft.activityName || '',
+            activityDateStart: draft.activityDateStart || '',
+            activityDateEnd: draft.activityDateEnd || '',
+            startTime: draft.startTime || '',
+            endTime: draft.endTime || '',
+            location: draft.location || '',
+            remark: draft.remark || '',
+        }
+        : null;
+
     activityModal.value.studentId = studentId;
     activityModal.value.mode = mode;
-    activityModal.value.activityId = mode === 'edit' ? (current.activityId || null) : null;
+    activityModal.value.activityId = useDraft
+        ? (draftCurrent.activityId || null)
+        : mode === 'edit'
+            ? (current.activityId || null)
+            : null;
     const defaultDate = props.selectedDate || '';
     activityModal.value.form = {
-        activity_name: mode === 'edit' ? (current.activityName || '') : '',
-        activity_date_start: mode === 'edit'
-            ? (normalizeDateInput(current.activityDateStart) || defaultDate)
-            : defaultDate,
-        activity_date_end: mode === 'edit'
-            ? (normalizeDateInput(current.activityDateEnd) || normalizeDateInput(current.activityDateStart) || defaultDate)
-            : defaultDate,
-        start_time: mode === 'edit' ? (current.startTime || '') : '08:00:00',
-        end_time: mode === 'edit' ? (current.endTime || '') : '17:00:00',
-        location: mode === 'edit' ? (current.location || '') : '',
-        remark: mode === 'edit' ? (current.remark || '') : '',
+        activity_name: useDraft ? (draftCurrent.activityName || '') : mode === 'edit' ? (current.activityName || '') : '',
+        activity_date_start: useDraft
+            ? (normalizeDateInput(draftCurrent.activityDateStart) || defaultDate)
+            : mode === 'edit'
+                ? (normalizeDateInput(current.activityDateStart) || defaultDate)
+                : defaultDate,
+        activity_date_end: useDraft
+            ? (normalizeDateInput(draftCurrent.activityDateEnd) || normalizeDateInput(draftCurrent.activityDateStart) || defaultDate)
+            : mode === 'edit'
+                ? (normalizeDateInput(current.activityDateEnd) || normalizeDateInput(current.activityDateStart) || defaultDate)
+                : defaultDate,
+        start_time: useDraft ? (draftCurrent.startTime || '') : mode === 'edit' ? (current.startTime || '') : '08:00:00',
+        end_time: useDraft ? (draftCurrent.endTime || '') : mode === 'edit' ? (current.endTime || '') : '17:00:00',
+        location: useDraft ? (draftCurrent.location || '') : mode === 'edit' ? (current.location || '') : '',
+        remark: useDraft ? (draftCurrent.remark || '') : mode === 'edit' ? (current.remark || '') : '',
     };
     await nextTick();
     activityModal.value.show = true;
@@ -853,7 +1115,7 @@ const formatTimeToSeconds = (timeStr) => {
 const createActivityRequest = async () => {
     if (autoSaving.value) return;
 
-    const isEditMode = activityModal.value.mode === 'edit';
+    const isEditMode = activityModal.value.mode === 'edit' || activityModal.value.mode === 'draft-edit';
 
     if (!activityModal.value.form.activity_name) {
         Swal.fire('แจ้งเตือน', 'กรุณากรอกชื่อกิจกรรม', 'warning');
@@ -889,81 +1151,30 @@ const createActivityRequest = async () => {
         }
     }
 
-    autoSaving.value = true;
-    try {
-        const payload = {
-            activity_name: activityModal.value.form.activity_name,
-            activity_date_start: activityDateStart,
-            activity_date_end: activityDateEnd,
-            start_time: startTimeFormatted,
-            end_time: endTimeFormatted,
-            location: activityModal.value.form.location || '',
-            status: 'เข้าร่วม',
-            remark: activityModal.value.form.remark || '',
-        };
 
-        let activityId = activityModal.value.activityId || null;
-
-        if (isEditMode) {
-            if (!activityId) {
-                Swal.fire('แจ้งเตือน', 'ไม่พบรหัสกิจกรรมสำหรับแก้ไข', 'warning');
-                return;
-            }
-            await activityService.updateActivity(activityId, payload);
-        } else {
-            const response = await activityService.createActivity({
-                ...payload,
-                user_id: studentId,
-            });
-            activityId = response?.data?._id || response?._id || activityId;
-        }
-
-        const pending = localPendingLeaveApprovals.value?.[studentId];
-        if (pending) {
-            const nextPreviousActivity = isSelectedDateInActivityRange(activityDateStart, activityDateEnd)
-                ? {
-                    activityId,
-                    activityName: activityModal.value.form.activity_name,
-                    activityDateStart,
-                    activityDateEnd,
-                    startTime: startTimeFormatted,
-                    endTime: endTimeFormatted,
-                    location: activityModal.value.form.location || '',
-                    remark: activityModal.value.form.remark || '',
-                }
-                : null;
-
-            setPendingPreviousActivity(studentId, nextPreviousActivity);
-            emit('update:attendanceData', localAttendanceData.value);
-            emit('update:pendingLeaveApprovals', localPendingLeaveApprovals.value);
-            closeActivityModal();
-            Swal.fire('สำเร็จ', isEditMode ? 'แก้ไขกิจกรรมเรียบร้อยแล้ว' : 'บันทึกกิจกรรมเรียบร้อยแล้ว', 'success');
-            return;
-        }
-
-        if (isSelectedDateInActivityRange(activityDateStart, activityDateEnd)) {
-            localAttendanceData.value[studentId] = {
-                status: 'activity',
-                activityId,
-                activityName: activityModal.value.form.activity_name,
-                activityDateStart: activityDateStart,
-                activityDateEnd: activityDateEnd,
-                startTime: startTimeFormatted,
-                endTime: endTimeFormatted,
-                location: activityModal.value.form.location || '',
-                remark: activityModal.value.form.remark || '',
-            };
-            emit('update:attendanceData', localAttendanceData.value);
-        }
-
+    const shouldShow = isSelectedDateInActivityRange(activityDateStart, activityDateEnd);
+    if (!shouldShow) {
+        removeDraftChange(studentId);
         closeActivityModal();
-        Swal.fire('สำเร็จ', isEditMode ? 'แก้ไขกิจกรรมเรียบร้อยแล้ว' : 'บันทึกกิจกรรมเรียบร้อยแล้ว', 'success');
-    } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', isEditMode ? 'แก้ไขกิจกรรมไม่สำเร็จ' : 'บันทึกกิจกรรมไม่สำเร็จ', 'error');
-        console.error('Save activity request error:', error);
-    } finally {
-        autoSaving.value = false;
+        return;
     }
+
+    upsertDraftChange(studentId, {
+        action: 'activity',
+        studentId,
+        activityId: activityModal.value.activityId || null,
+        activityName: activityModal.value.form.activity_name,
+        activityDateStart,
+        activityDateEnd,
+        startTime: startTimeFormatted,
+        endTime: endTimeFormatted,
+        location: activityModal.value.form.location || '',
+        remark: activityModal.value.form.remark || '',
+        mode: isEditMode ? 'edit' : 'create',
+    });
+
+    closeActivityModal();
+    Swal.fire('สำเร็จ', 'เพิ่มรายการกิจกรรมเข้าคิวบันทึกแล้ว', 'success');
 };
 
 const editActivity = async (studentId) => {
@@ -1095,86 +1306,135 @@ const createLeaveRequest = async () => {
         return;
     }
 
-    autoSaving.value = true;
-    try {
-        const isEditMode = leaveModal.value.mode === 'edit';
-        let leaveRequestId = leaveModal.value.requestId;
-        let leaveStatus = 'pending';
-        const previousActivity = getCurrentActivitySnapshot(studentId);
+    const isEditMode = leaveModal.value.mode === 'edit' || leaveModal.value.mode === 'draft-edit';
+    const shouldShowLeaveOnCurrentDate = isSelectedDateInLeaveRange(leaveStartDate, leaveEndDate);
+    if (!shouldShowLeaveOnCurrentDate) {
+        removeDraftChange(studentId);
+        closeLeaveModal();
+        return;
+    }
 
-        if (isEditMode && leaveRequestId) {
-            await leaveService.updateLeaveRequest(leaveRequestId, {
-                leave_type_id: leaveTypeId,
-                start_date: leaveStartDate,
-                end_date: leaveEndDate,
-                start_time: startTime,
-                end_time: endTime,
-                reason,
-                attachment_url: '',
-            });
+    const previousActivity = getCurrentActivitySnapshot(studentId);
+    upsertDraftChange(studentId, {
+        action: 'leave',
+        studentId,
+        requestId: leaveModal.value.requestId || null,
+        leaveTypeId,
+        leaveTypeName,
+        startDate: leaveStartDate,
+        endDate: leaveEndDate,
+        startTime,
+        endTime,
+        reason,
+        previousActivity,
+        mode: isEditMode ? 'edit' : 'create',
+    });
+
+    closeLeaveModal();
+    Swal.fire('สำเร็จ', 'เพิ่มรายการลาเข้าคิวบันทึกแล้ว', 'success');
+};
+
+const saveSingleDraftChange = async (studentId, draftChange) => {
+    if (!studentId || !draftChange) return;
+
+    if (draftChange.action === 'present') {
+        await leaveService.manualAttendance({
+            user_id: studentId,
+            date: props.selectedDate,
+            time: toAttendanceSubmitTime(),
+            remark: '',
+        });
+        return;
+    }
+
+    if (draftChange.action === 'leave') {
+        let leaveRequestId = draftChange.requestId || null;
+        const payload = {
+            leave_type_id: draftChange.leaveTypeId,
+            start_date: draftChange.startDate,
+            end_date: draftChange.endDate,
+            start_time: normalizeTimeInput(draftChange.startTime),
+            end_time: normalizeTimeInput(draftChange.endTime),
+            reason: draftChange.reason || '',
+            attachment_url: '',
+        };
+
+        if (draftChange.mode === 'edit' && leaveRequestId) {
+            await leaveService.updateLeaveRequest(leaveRequestId, payload);
         } else {
             const response = await leaveService.createLeaveRequest({
-                leave_type_id: leaveTypeId,
+                ...payload,
                 user_id: studentId,
-                start_date: leaveStartDate,
-                end_date: leaveEndDate,
-                start_time: startTime,
-                end_time: endTime,
-                reason,
-                attachment_url: '',
             });
             leaveRequestId = response?.data?._id || response?._id || null;
-
             if (leaveRequestId) {
                 await leaveService.approveLeaveRequest(leaveRequestId, 'อนุมัติการลา');
-                leaveStatus = 'approved';
             }
         }
+        return;
+    }
 
-        const shouldShowLeaveOnCurrentDate = isSelectedDateInLeaveRange(leaveStartDate, leaveEndDate);
+    if (draftChange.action === 'activity') {
+        const payload = {
+            activity_name: draftChange.activityName,
+            activity_date_start: draftChange.activityDateStart,
+            activity_date_end: draftChange.activityDateEnd,
+            start_time: normalizeTimeInput(draftChange.startTime || '00:00'),
+            end_time: normalizeTimeInput(draftChange.endTime || '23:59'),
+            location: draftChange.location || '',
+            status: 'เข้าร่วม',
+            remark: draftChange.remark || '',
+        };
 
-        if (shouldShowLeaveOnCurrentDate) {
-            localAttendanceData.value[studentId] = {
-                status: 'leave',
-                leaveType: leaveTypeName,
-                leaveTypeId,
-                remark: reason,
-                leaveRequestId,
-                leaveStatus,
-                previousActivity,
-            };
-
-            if (leaveStatus === 'pending') {
-                localPendingLeaveApprovals.value[studentId] = {
-                    requestId: leaveRequestId,
-                    startDate: leaveStartDate,
-                    endDate: leaveEndDate,
-                    leaveTypeId,
-                    leaveType: leaveTypeName,
-                    startTime,
-                    endTime,
-                    reason,
-                    previousActivity,
-                };
-            } else {
-                delete localPendingLeaveApprovals.value[studentId];
-            }
+        if (draftChange.mode === 'edit' && draftChange.activityId) {
+            await activityService.updateActivity(draftChange.activityId, payload);
         } else {
-            delete localAttendanceData.value[studentId];
-            delete localPendingLeaveApprovals.value[studentId];
+            await activityService.createActivity({
+                ...payload,
+                user_id: studentId,
+            });
         }
+    }
+};
 
-        emit('update:attendanceData', localAttendanceData.value);
-        emit('update:pendingLeaveApprovals', localPendingLeaveApprovals.value);
-        closeLeaveModal();
-        if (isEditMode) {
-            Swal.fire('สำเร็จ', 'แก้ไขคำขอลาเรียบร้อยแล้ว', 'success');
+const saveAllDraftChanges = async () => {
+    if (autoSaving.value || draftCount.value === 0) return;
+    if (!props.selectedDate) {
+        Swal.fire('แจ้งเตือน', 'กรุณาเลือกวันที่ก่อน', 'warning');
+        return;
+    }
+
+    autoSaving.value = true;
+    let successCount = 0;
+    let failCount = 0;
+
+    const entries = Object.entries(draftChanges.value || {}).sort((a, b) => {
+        const timeA = Number(a?.[1]?.updatedAt || 0);
+        const timeB = Number(b?.[1]?.updatedAt || 0);
+        return timeA - timeB;
+    });
+
+    for (const [studentId, draftChange] of entries) {
+        try {
+            await saveSingleDraftChange(studentId, draftChange);
+            removeDraftChange(studentId);
+            successCount += 1;
+        } catch (error) {
+            failCount += 1;
+            console.error(`Save queued checkname failed for ${studentId}:`, error);
         }
-    } catch (error) {
-        Swal.fire('เกิดข้อผิดพลาด', leaveModal.value.mode === 'edit' ? 'แก้ไขคำขอลาไม่สำเร็จ' : 'บันทึกการลาไม่สำเร็จ', 'error');
-        console.error('Create leave request error:', error);
-    } finally {
-        autoSaving.value = false;
+    }
+
+    autoSaving.value = false;
+
+    if (successCount > 0) {
+        emit('request:reload');
+    }
+
+    if (failCount === 0) {
+        Swal.fire('สำเร็จ', `บันทึกรายการสำเร็จ ${successCount} รายการ`, 'success');
+    } else {
+        Swal.fire('บันทึกไม่ครบ', `สำเร็จ ${successCount} รายการ, ไม่สำเร็จ ${failCount} รายการ`, 'warning');
     }
 };
 

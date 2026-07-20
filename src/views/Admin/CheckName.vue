@@ -70,9 +70,10 @@
             </div>
 
             <CheckNameTable :students="students" :selectedDate="selectedDate" :selectedGrade="selectedGrade"
-                :loading="loading" :attendanceData="attendanceData" :pendingLeaveApprovals="pendingLeaveApprovals"
+                :selectedClassroom="selectedClassroom" :selectedDepartment="selectedDepartment" :loading="loading"
+                :attendanceData="attendanceData" :pendingLeaveApprovals="pendingLeaveApprovals"
                 :selectedRole="selectedRole" @update:attendanceData="attendanceData = $event"
-                @update:pendingLeaveApprovals="pendingLeaveApprovals = $event" />
+                @update:pendingLeaveApprovals="pendingLeaveApprovals = $event" @request:reload="loadUsers" />
         </div>
     </div>
 </template>

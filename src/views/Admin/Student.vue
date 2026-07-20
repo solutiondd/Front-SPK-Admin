@@ -245,7 +245,8 @@ const mapStudentRow = (student) => ({
     score: Number.isFinite(Number(student.score)) ? Number(student.score) : 100,
     phone: student.phone || '-',
     picture: normalizeImagePath(student.picture),
-    has_password: student.has_password
+    has_password: student.has_password,
+    no_use_face: student.no_use_face
 })
 
 const openDetailModal = (student) => {

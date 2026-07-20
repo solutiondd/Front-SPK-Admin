@@ -15,7 +15,7 @@
                     <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                 </form>
                 <h3 class="font-bold text-lg mb-4">รายการเข้าเรียน{{ attendanceRole === 'teacher' ? 'ครู' : 'นักเรียน'
-                }} วันที่ {{ displayDate }}</h3>
+                    }} วันที่ {{ displayDate }}</h3>
                 <div v-if="attendanceRole === 'student'">
                     <Attendance :role="'student'" :date="selectedDate" v-if="residentRole !== 'teacher'" />
                     <Attendance :role="'student'" :date="selectedDate" v-else :fixed-grade="localGrade"
@@ -41,14 +41,14 @@
                     {{ displayDate }}</h3>
 
                 <div v-if="lateRole === 'student'">
-                    <LateTable :data="lateData" :pagination="latePagination" :allowance-rules="allowanceRules"
+                    <LateTable :data="lateData" :pagination="latePagination" :allowance-rules="allowanceRules" :timeSortOrder="lateTimeSortOrder"
                         grade="student" :filters="{ start: selectedDate, end: selectedDate, role: 'student' }"
-                        :hide-export="true" @page-change="handleLatePageChange" summaryTextColor="text-black" />
+                        :hide-export="true" @page-change="handleLatePageChange" @toggle-time-sort="handleToggleLateTimeSort" summaryTextColor="text-black" />
                 </div>
                 <div v-else>
-                    <LateTable :data="lateData" :pagination="latePagination" :allowance-rules="allowanceRules"
+                    <LateTable :data="lateData" :pagination="latePagination" :allowance-rules="allowanceRules" :timeSortOrder="lateTimeSortOrder"
                         :filters="{ start: selectedDate, end: selectedDate, role: 'teacher' }" :hide-export="true"
-                        @page-change="handleLatePageChange" summaryTextColor="text-black" />
+                        @page-change="handleLatePageChange" @toggle-time-sort="handleToggleLateTimeSort" summaryTextColor="text-black" />
                 </div>
             </div>
             <form method="dialog" class="modal-backdrop">
@@ -62,7 +62,7 @@
                     <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                 </form>
                 <h3 class="font-bold text-lg mb-4">รายการที่ไม่ได้สแกน{{ missedRole === 'teacher' ? 'ครู' : 'นักเรียน'
-                }} วันที่
+                    }} วันที่
                     {{ displayDate }}</h3>
 
                 <MissedTable :data="missedData" :pagination="missedPagination" :hide-export="true"
@@ -82,7 +82,7 @@
                 <h3 class="font-bold text-lg mb-4">รายการลา{{ leaveRole === 'teacher' ? 'ครู' : 'นักเรียน' }} วันที่
                     {{ displayDate }}</h3>
 
-                <LeaveRequest :filters="leaveFilters" />
+                <LeaveRequest :filters="leaveFilters" :hide-export="true" />
             </div>
             <form method="dialog" class="modal-backdrop">
                 <button>close</button>
@@ -98,7 +98,7 @@
                     วันที่
                     {{ displayDate }}</h3>
 
-                <ActivityTable :filters="activityFilters" />
+                <ActivityTable :filters="activityFilters" :hide-export="true" />
             </div>
             <form method="dialog" class="modal-backdrop">
                 <button>close</button>
@@ -386,6 +386,7 @@ const lateLimit = ref(5)
 const lateTotalItems = ref(0)
 const lateTotalPages = ref(0)
 const lateRole = ref('student')
+const lateTimeSortOrder = ref('desc')
 const leaveRole = ref('student')
 const activityRole = ref('student')
 const missedData = ref([])
@@ -680,6 +681,28 @@ async function showTeacherAttendanceTable() {
     }
 }
 
+function sortLateData(data, sortOrder = 'desc') {
+    if (!Array.isArray(data)) return []
+    return [...data].sort((a, b) => {
+        const getTimeInSeconds = (item) => {
+            const firstStamp = item.late_dates?.[0]?.timeStamps?.[0]?.timeStamp
+            if (!firstStamp) return 0
+            const timeStr = firstStamp.split(' ')[1] || '00:00:00'
+            const [h, m, s] = timeStr.split(':').map(Number)
+            return (h * 3600) + (m * 60) + (s || 0)
+        }
+        const timeA = getTimeInSeconds(a)
+        const timeB = getTimeInSeconds(b)
+        
+        return sortOrder === 'desc' ? timeB - timeA : timeA - timeB
+    })
+}
+
+function handleToggleLateTimeSort() {
+    lateTimeSortOrder.value = lateTimeSortOrder.value === 'desc' ? 'asc' : 'desc'
+    lateData.value = sortLateData(lateAllData.value, lateTimeSortOrder.value)
+}
+
 async function showStudentLateTable() {
     try {
         loading.value = true
@@ -689,7 +712,8 @@ async function showStudentLateTable() {
             end: selectedDate.value,
             role: 'student',
             page: latePage.value,
-            limit: lateLimit.value
+            limit: lateLimit.value,
+            sort: lateTimeSortOrder.value 
         }
         if (residentRole.value === 'teacher') {
             params.grade = localGrade.value
@@ -701,7 +725,7 @@ async function showStudentLateTable() {
             lateTotalItems.value = res.total_items || lateAllData.value.length;
             lateTotalPages.value = res.total_pages || 1;
             latePage.value = res.page || 1;
-            lateData.value = lateAllData.value;
+            lateData.value = sortLateData(lateAllData.value, lateTimeSortOrder.value);
             lateModal.value?.showModal();
         }
     } catch (e) {

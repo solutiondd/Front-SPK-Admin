@@ -32,14 +32,14 @@ export default {
 
   // ฟีเจอร์สำหรับหน้า Home
   home: {
-    enableProgress: false, // true = แสดง Progress, false = ซ่อน
+    enableProgress: true, // true = แสดง Progress, false = ซ่อน
   },
 
   // ฟีเจอร์สำหรับเมนู
   menu: {
     enableUniformInspection: true, // เมนูตรวจเครื่องแบบ
     enableReportUniformInspection: true, // เมนูรายงานตรวจระเบียบ
-    enableAllowanceSetting: true, // เมนูตั้งค่าสาย
+    enableAllowanceSetting: false, // เมนูตั้งค่าสาย
   },
 
   // ฟรีเจอร์ลบรายงานตรวจระเบียบ

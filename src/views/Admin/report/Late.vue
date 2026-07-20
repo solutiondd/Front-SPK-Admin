@@ -77,13 +77,13 @@
 
         <div v-else>
             <LateTable 
-            :data="paginatedData" 
-            :pagination="paginationData" 
-            :filters="filters" 
-            :grade="filters.grade"
-            :classroom="filters.classroom"
-            :allowance-rules="allowanceRules"
-            @page-change="goToPage" />
+                :data="lateData" 
+                :pagination="pagination" 
+                :filters="filters" 
+                :grade="filters.grade"
+                :classroom="filters.classroom"
+                :allowance-rules="allowanceRules"
+                @page-change="goToPage" />
         </div>
     </div>
 </template>
@@ -134,7 +134,9 @@ const filters = ref({
 
 const pagination = ref({
     page: 1,
-    limit: 10
+    limit: 10,
+    total_items: 0,
+    total_pages: 1
 })
 
 function getDefaultDate() {
@@ -150,8 +152,8 @@ const fetchData = async () => {
             start: filters.value.start,
             end: filters.value.end,
             role: filters.value.role,
-            page: 1,
-            limit: 50
+            page: pagination.value.page,
+            limit: pagination.value.limit
         }
         const searchTerm = filters.value.search.trim();
         if (searchTerm) {
@@ -164,19 +166,21 @@ const fetchData = async () => {
         if (filters.value.role === 'student') {
             params.grade = filters.value.grade;
             if (
-                filters.value.classroom === '' ||
-                filters.value.classroom === undefined ||
-                filters.value.classroom === null ||
-                isNaN(Number(filters.value.classroom))
+                filters.value.classroom !== '' &&
+                filters.value.classroom !== undefined &&
+                filters.value.classroom !== null &&
+                !isNaN(Number(filters.value.classroom))
             ) {
-            } else {
                 params.classroom = Number(filters.value.classroom);
             }
         }
+
         const response = await reportApi.getLateReport(params)
         if (response.message === 'Success') {
             lateData.value = response.data || []
-            pagination.value.page = 1
+            pagination.value.page = response.page || 1
+            pagination.value.total_items = response.total_items || 0
+            pagination.value.total_pages = response.total_pages || 1
         }
     } catch (err) {
         error.value = 'เกิดข้อผิดพลาดในการดึงข้อมูล กรุณาลองใหม่อีกครั้ง'
@@ -193,8 +197,8 @@ const handleRoleChange = () => {
         filters.value.grade = ''
         filters.value.classroom = ''
     } else {
-        filters.value.grade = allGrades.value.length > 0 ? allGrades.value[0] : ''
-        filters.value.classroom = allRooms.value.length > 0 ? allRooms.value[0] : '1'
+        filters.value.grade = ''
+        filters.value.classroom = ''
     }
     fetchData()
 }
@@ -205,6 +209,11 @@ const handleGradeChange = () => {
 }
 
 const handleClassroomChange = () => {
+    pagination.value.page = 1
+    fetchData()
+}
+
+const handleSearchInput = () => {
     pagination.value.page = 1
     fetchData()
 }
@@ -263,8 +272,9 @@ const paginationData = computed(() => ({
 }))
 
 const goToPage = (page) => {
-    if (page >= 1 && page <= totalPages.value) {
+    if (page >= 1 && page <= pagination.value.total_pages) {
         pagination.value.page = page
+        fetchData()
     }
 }
 
@@ -282,9 +292,9 @@ onMounted(async () => {
         })
         allGrades.value = toVisibleSortedGrades(Array.from(gradesSet))
         allRooms.value = Array.from(roomsSet)
-        if (filters.value.role === 'student' && !filters.value.grade) {
-            filters.value.grade = allGrades.value[0] || ''
-        }
+        // if (filters.value.role === 'student' && !filters.value.grade) {
+        //     filters.value.grade = allGrades.value[0] || ''
+        // }
     } catch (err) {
         console.error('Error fetching class rooms:', err)
     }
