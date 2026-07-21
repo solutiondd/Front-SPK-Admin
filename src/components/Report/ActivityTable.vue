@@ -1,5 +1,16 @@
 <template>
     <div class="w-full">
+        <div class="flex justify-end mb-2" v-if="!hideExport">
+            <button class="btn btn-sm btn-success" :disabled="loadingExport" @click="exportActivityToExcel">
+                <span v-if="loadingExport" class="loading loading-spinner loading-xs mr-2"></span>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                ส่งออก Excel
+            </button>
+        </div>
+
         <div v-if="loading" class="flex justify-center py-8">
             <span class="loading loading-spinner loading-lg"></span>
         </div>
@@ -58,6 +69,8 @@
 
 <script setup>
 import { ref, watch } from 'vue';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import { ActivityService } from '../../api/activity';
 import ActivityDetail from './ActivityDetail.vue';
 
@@ -75,10 +88,15 @@ const props = defineProps({
             classroom: '',
         }),
     },
+    hideExport: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const activityService = new ActivityService();
 const loading = ref(false);
+const loadingExport = ref(false);
 const activities = ref([]);
 const activityDetailRef = ref(null);
 
@@ -123,6 +141,91 @@ const formatDate = (date) => {
 
 const openDetail = (activity) => {
     activityDetailRef.value?.openModal(activity);
+};
+
+const formatTimeRange = (startTime, endTime) => {
+    if (!startTime && !endTime) return '-';
+    if (startTime && endTime) return `${startTime} - ${endTime}`;
+    return startTime || endTime || '-';
+};
+
+const exportActivityToExcel = async () => {
+    if (loadingExport.value) return;
+    loadingExport.value = true;
+
+    try {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('ActivityReport');
+
+        let reportRange = '';
+        if (props.filters?.start_date && props.filters?.end_date) {
+            reportRange = `(${formatDate(props.filters.start_date)} - ${formatDate(props.filters.end_date)})`;
+        }
+
+        worksheet.addRow([`รายงานกิจกรรม ${reportRange}`]);
+        worksheet.mergeCells('A1:I1');
+        worksheet.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' };
+        worksheet.getCell('A1').font = { bold: true };
+
+        const headers = [
+            'ลำดับ',
+            'รหัส',
+            'ชื่อ',
+            'ตำแหน่ง',
+            'ชื่อกิจกรรม',
+            'สถานที่',
+            'ช่วงเวลา',
+            'วันที่กิจกรรม',
+            'สถานะ',
+        ];
+        worksheet.addRow(headers);
+
+        activities.value.forEach((item, index) => {
+            worksheet.addRow([
+                index + 1,
+                item.user_id?.userid || '-',
+                item.user_id?.name || '-',
+                formatRole(item.user_id?.role),
+                item.activity_name || '-',
+                item.location || '-',
+                formatTimeRange(item.start_time, item.end_time),
+                formatDate(item.activity_date_start || item.activity_date || item.date),
+                formatStatus(item.status),
+            ]);
+        });
+
+        worksheet.columns = [
+            { width: 10 },
+            { width: 16 },
+            { width: 24 },
+            { width: 14 },
+            { width: 36 },
+            { width: 28 },
+            { width: 20 },
+            { width: 18 },
+            { width: 16 },
+        ];
+
+        worksheet.getRow(2).font = { bold: true };
+        worksheet.getRow(2).alignment = { horizontal: 'center', vertical: 'middle' };
+        worksheet.getColumn(1).alignment = { horizontal: 'center', vertical: 'middle' };
+        worksheet.getColumn(2).alignment = { horizontal: 'center', vertical: 'middle' };
+        worksheet.getColumn(4).alignment = { horizontal: 'center', vertical: 'middle' };
+        worksheet.getColumn(6).alignment = { horizontal: 'center', vertical: 'middle' };
+        worksheet.getColumn(7).alignment = { horizontal: 'center', vertical: 'middle' };
+        worksheet.getColumn(8).alignment = { horizontal: 'center', vertical: 'middle' };
+        worksheet.getColumn(9).alignment = { horizontal: 'center', vertical: 'middle' };
+
+        const safeStart = props.filters?.start_date || '';
+        const safeEnd = props.filters?.end_date || '';
+        const buffer = await workbook.xlsx.writeBuffer();
+        saveAs(new Blob([buffer], { type: 'application/octet-stream' }), `ActivityReport_${safeStart}_${safeEnd}.xlsx`);
+    } catch (error) {
+        alert('เกิดข้อผิดพลาดในการส่งออก Excel');
+        console.error('Error exporting activity report:', error);
+    } finally {
+        loadingExport.value = false;
+    }
 };
 
 const extractRows = (response) => {

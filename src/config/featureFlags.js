@@ -32,7 +32,7 @@ export default {
 
   // ฟีเจอร์สำหรับหน้า Home
   home: {
-    enableProgress: false, // true = แสดง Progress, false = ซ่อน
+    enableProgress: true, // true = แสดง Progress, false = ซ่อน
   },
 
   // ฟีเจอร์สำหรับเมนู
@@ -40,5 +40,10 @@ export default {
     enableUniformInspection: false, // เมนูตรวจเครื่องแบบ
     enableReportUniformInspection: false, // เมนูรายงานตรวจระเบียบ
     enableAllowanceSetting: true, // เมนูตั้งค่าสาย
+  },
+
+  // ฟรีเจอร์ลบรายงานตรวจระเบียบ
+  reportUniformInspection: {
+    enableDelete: false, // true = แสดงปุ่มลบในตารางรายงานตรวจระเบียบ, false = ซ่อน
   },
 };

@@ -14,6 +14,7 @@
             <table class="table table-zebra w-full">
                 <thead>
                     <tr class="bg-primary text-primary-content">
+                        <th class="text-center w-16">#</th>
                         <th class="text-center w-20 min-w-[60px] max-w-[80px]">รหัส</th>
                         <th class="text-center w-20 min-w-[60px] max-w-[80px]">โปรไฟล์</th>
                         <th>ชื่อ-สกุล</th>
@@ -27,13 +28,16 @@
                 </thead>
                 <tbody>
                     <tr v-if="data.length === 0">
-                        <td colspan="9" class="text-center py-8 text-base-content/60">
+                        <td colspan="10" class="text-center py-8 text-base-content/60">
                             ไม่พบข้อมูล
                         </td>
                     </tr>
-                    <template v-for="item in sortedData" :key="item._id">
+                    <template v-for="(item, index) in sortedData" :key="item._id">
                         <template v-if="item.late_dates && item.late_dates.length > 0">
                             <tr class="hover" :key="item._id + '-first'">
+                                <td class="text-center">
+                                    {{ ((pagination.page - 1) * pagination.limit) + index + 1 }}
+                                </td>
                                 <td class="text-center w-20 min-w-[60px] max-w-[80px]">{{ item.userid }}</td>
                                 <td class="text-center w-20 min-w-[60px] max-w-[80px]">
                                     <div v-if="item.picture" class="avatar cursor-pointer inline-flex"
@@ -102,6 +106,7 @@
                             </tr>
                             <template v-for="(late, lateIdx) in item.late_dates" :key="item._id + '-late-' + lateIdx">
                                 <tr v-if="lateIdx > 0" class="hover">
+                                    <td class="text-center"></td>
                                     <td class="text-center w-20 min-w-[60px] max-w-[80px]"></td>
                                     <td class="text-center w-20 min-w-[60px] max-w-[80px]"></td>
                                     <td></td>
@@ -151,6 +156,9 @@
                             </template>
                         </template>
                         <tr v-else class="hover">
+                            <td class="text-center font-bold">
+                                {{ ((pagination.page - 1) * pagination.limit) + index + 1 }}
+                            </td>
                             <td class="text-center w-20 min-w-[60px] max-w-[80px]">{{ item.userid }}</td>
                             <td class="text-center w-20 min-w-[60px] max-w-[80px]">
                                 <div v-if="item.picture" class="avatar cursor-pointer inline-flex"
